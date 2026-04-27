@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Evaluación de Desempeño</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4fa;--surface:#fff;--surface2:#f7f9fc;--surface3:#eef2f9;
+  --border:#dce4f0;--border2:#c8d6ec;
+  --blue:#2563eb;--blue-l:#dbeafe;--blue-m:#93c5fd;--blue-d:#1d4ed8;
+  --teal:#0891b2;--teal-l:#cffafe;--teal-d:#0e7490;
+  --purple:#7c3aed;--purple-l:#ede9fe;
+  --green:#059669;--green-l:#d1fae5;
+  --amber:#d97706;--amber-l:#fef3c7;
+  --red:#dc2626;--red-l:#fee2e2;
+  --text:#0f172a;--text2:#334155;--text3:#64748b;--text4:#94a3b8;
+  --shadow:0 1px 3px rgba(37,99,235,.07),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 16px rgba(37,99,235,.10),0 2px 4px rgba(0,0,0,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(37,99,235,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0}
+
+/* NAV */
+.app-nav{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow)}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center}
+.nav-brand{font-family:'DM Serif Display',serif;font-size:17px;color:var(--blue);padding:13px 0;margin-right:24px;flex-shrink:0}
+.nav-tabs{display:flex;overflow-x:auto}
+.nav-tab{background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--text3);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:13px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.nav-tab:hover{color:var(--blue)}
+.nav-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* LAYOUT */
+.container{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.page-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:7px}
+.page-header h2{font-family:'DM Serif Display',serif;font-size:clamp(20px,3vw,28px);font-weight:400;margin-bottom:4px}
+.page-header h2 em{font-style:italic;color:var(--blue)}
+.page-header p{color:var(--text3);font-size:13px}
+
+/* SECTION */
+.section{margin-bottom:22px}
+.sec-title{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.sec-num{background:var(--blue);color:#fff;font-size:10px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-lbl{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text2)}
+.sec-line{flex:1;height:1px;background:var(--border)}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;box-shadow:var(--shadow)}
+.card-blue{border-top:3px solid var(--blue)}.card-teal{border-top:3px solid var(--teal)}
+.card-purple{border-top:3px solid var(--purple)}.card-green{border-top:3px solid var(--green)}
+
+/* GRID */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.two-col{grid-template-columns:1fr}}
+
+/* FORM */
+.field{margin-bottom:10px}
+label{display:block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+input[type=number],input[type=text],textarea,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:8px 11px;outline:none;transition:border-color .15s,box-shadow .15s;appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.09)}
+textarea{resize:vertical;min-height:60px}
+.field-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* TOGGLE */
+.toggle-group{display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px}
+.tbtn{background:none;border:none;color:var(--text3);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:6px 13px;border-radius:6px;cursor:pointer;transition:all .18s}
+.tbtn.active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 1px 4px rgba(37,99,235,.3)}
+.tbtn:not(.active):hover{background:var(--border);color:var(--text2)}
+
+/* ESCALA BLOCK */
+.escala-block{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+.escala-head{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;background:var(--surface2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.escala-head-l{display:flex;align-items:center;gap:9px}
+.escala-badge{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:20px}
+.badge-blue{background:var(--blue-l);color:var(--blue)}.badge-teal{background:var(--teal-l);color:var(--teal)}
+.badge-green{background:var(--green-l);color:var(--green)}.badge-purple{background:var(--purple-l);color:var(--purple)}
+.escala-name{font-weight:600;font-size:13px;color:var(--text)}
+.escala-body{padding:15px}
+
+/* NIVEL ROWS */
+.nivel-row-r{display:grid;grid-template-columns:1.8fr 1fr 1fr 30px;gap:8px;margin-bottom:7px;align-items:center}
+.nivel-row-res{display:grid;grid-template-columns:2fr 1fr 1fr 30px;gap:8px;margin-bottom:7px;align-items:center}
+.col-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text4);padding-bottom:4px;border-bottom:1px solid var(--border)}
+.add-btn{background:var(--surface2);border:1px dashed var(--border2);color:var(--text3);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:6px;border-radius:6px;cursor:pointer;width:100%;margin-top:5px;transition:all .15s}
+.add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.rm-btn{background:none;border:none;color:var(--text4);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:4px;transition:all .12s;justify-self:center}
+.rm-btn:hover{color:var(--red);background:var(--red-l)}
+.inner-sep{border:none;border-top:1px solid var(--border);margin:11px 0}
+.mini-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:7px}
+
+/* QUICK SELECT */
+.quick-btns{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.qbtn{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text2);font-family:'Inter',sans-serif;cursor:pointer;padding:5px 11px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:50px;transition:all .15s}
+.qbtn .qv{font-size:15px;font-weight:700;color:var(--text)}
+.qbtn .qn{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.qbtn:hover{border-color:var(--blue);background:var(--blue-l)}
+.qbtn.sel{border-color:var(--blue);background:var(--blue-l)}
+.qbtn.sel .qv{color:var(--blue)}.qbtn.sel .qn{color:var(--blue-d)}
+
+/* CALC BTN */
+.calc-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;padding:10px 24px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(37,99,235,.22);white-space:nowrap}
+.calc-btn:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:0 4px 12px rgba(37,99,235,.30)}
+.calc-btn:active{transform:translateY(0)}
+.calc-btn.full{width:100%;padding:13px;font-size:15px;margin-top:4px}
+
+/* INPUT ROW */
+.input-row{display:flex;gap:12px;align-items:flex-end}
+.input-row .field{flex:1;margin:0}
+@media(max-width:480px){.input-row{flex-direction:column}.calc-btn{width:100%}}
+
+/* FORMULA */
+.formula-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--blue-m);border-radius:0 6px 6px 0;padding:8px 13px;font-size:11.5px;color:var(--text3);margin-top:9px;line-height:1.9}
+.fv{color:var(--blue);font-weight:600}.fv2{color:var(--teal);font-weight:600}
+
+/* WEIGHT SLIDER */
+.weight-area{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.weight-pct{font-family:'DM Serif Display',serif;font-size:26px;line-height:1}
+.weight-pct.blue{color:var(--blue)}.weight-pct.teal{color:var(--teal)}
+.slider-wrap{flex:1;min-width:180px}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(to right,var(--blue) 0%,var(--blue) 50%,var(--teal) 50%,var(--teal) 100%);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--surface);border:2px solid var(--blue);box-shadow:0 1px 4px rgba(37,99,235,.3);cursor:pointer}
+
+/* ERROR */
+.err-msg{color:var(--red);font-size:12px;margin-top:7px;display:none}
+.err-msg.show{display:block}
+
+/* RESULT PANEL */
+.result-panel{display:none}.result-panel.show{display:block;animation:slideUp .3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* RESULT HERO */
+.result-hero{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.result-big{font-family:'DM Serif Display',serif;font-size:68px;color:var(--blue);line-height:1}
+.result-info h3{font-size:20px;font-weight:700;margin-bottom:4px}
+.result-badge{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+.result-sub{color:var(--text3);font-size:12px;margin-top:5px;line-height:1.5}
+
+/* BREAKDOWN */
+.breakdown-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:500px){.breakdown-grid{grid-template-columns:1fr}}
+.bdown-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:13px;position:relative;overflow:hidden}
+.bdown-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%}
+.bc-blue::before{background:var(--blue)}.bc-teal::before{background:var(--teal)}
+.bc-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:5px}
+.bc-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:2px}
+.bc-sub{font-size:11px;color:var(--text3);line-height:1.4}
+
+/* BARS */
+.bar-row{display:grid;grid-template-columns:110px 1fr 64px;gap:9px;align-items:center;margin-bottom:6px}
+.bar-name{font-size:11px;color:var(--text3);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{background:var(--surface2);border:1px solid var(--border);border-radius:4px;height:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;transition:width .6s cubic-bezier(.16,1,.3,1)}
+.dot-pulse{width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:4px;animation:pulse 1.5s ease infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.bar-val{font-size:11px;font-weight:500}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:500px){.stat-grid{grid-template-columns:1fr 1fr}}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 13px}
+.stat-val{font-size:20px;font-weight:700;color:var(--blue);line-height:1;margin-bottom:2px}
+.stat-lbl{font-size:11px;color:var(--text3);font-weight:500}
+
+/* ANALYSIS */
+.an-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
+.an-head{display:flex;align-items:center;gap:10px;padding:12px 17px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.an-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.an-title{font-weight:600;font-size:13px}.an-sub{font-size:11px;color:var(--text3)}
+.an-body{padding:16px}
+.sbanner{border-radius:8px;padding:12px 14px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+.si{font-size:17px;flex-shrink:0;margin-top:1px}
+.st{font-weight:600;font-size:12.5px;margin-bottom:2px}
+.sx{font-size:12px;color:var(--text2);line-height:1.5}
+.bok{background:var(--green-l);border:1px solid #6ee7b7}
+.bwarn{background:var(--amber-l);border:1px solid #fcd34d}
+.binfo{background:var(--blue-l);border:1px solid var(--blue-m)}
+.bpurple{background:var(--purple-l);border:1px solid #c4b5fd}
+.bteal{background:var(--teal-l);border:1px solid #67e8f9}
+
+/* TABLE */
+.map-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.map-table th{background:var(--surface2);border:1px solid var(--border);padding:6px 9px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3)}
+.map-table td{border:1px solid var(--border);padding:6px 9px;text-align:center;color:var(--text2)}
+.map-table tr:hover td{background:var(--blue-l)}
+.map-table td.hl{font-weight:700;color:var(--blue);background:var(--blue-l)}
+.cat-pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10.5px;font-weight:600}
+
+/* MODE DESC */
+.mode-desc{margin-top:9px;padding:9px 13px;background:var(--blue-l);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;font-size:12.5px;color:var(--text2)}
+
+/* WEIGHT BADGE */
+.w-badge{display:inline-flex;align-items:center;gap:5px;background:var(--blue-l);color:var(--blue);font-size:12px;font-weight:700;padding:4px 11px;border-radius:20px;border:1px solid var(--blue-m)}
+
+/* ═══════════════════════════════════════════
+   SIMULADOR DE FORMULARIO
+══════════════════════════════════════════════ */
+.sim-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
+.sim-sec-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.sim-sec-head.blue-head{background:linear-gradient(135deg,var(--blue-l),#eff6ff)}
+.sim-sec-head.teal-head{background:linear-gradient(135deg,var(--teal-l),#f0fdfe)}
+.sim-sec-title{display:flex;align-items:center;gap:9px}
+.sim-sec-name{font-weight:700;font-size:14px}
+.sim-sec-weight{font-size:12px;color:var(--text3);font-weight:500}
+.sim-items{padding:0}
+
+/* Competency / Objective item row */
+.sim-item{display:grid;grid-template-columns:1fr auto;gap:0;border-bottom:1px solid var(--border)}
+.sim-item:last-child{border-bottom:none}
+.sim-item-left{padding:14px 16px}
+.sim-item-name{font-weight:600;font-size:13px;color:var(--text);margin-bottom:2px}
+.sim-item-desc{font-size:11.5px;color:var(--text3);margin-bottom:10px}
+.sim-item-right{padding:14px 16px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;min-width:200px;border-left:1px solid var(--border);background:var(--surface2)}
+
+/* Rating stars / buttons */
+.rating-btns{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.r-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:6px;color:var(--text3);font-family:'Inter',sans-serif;cursor:pointer;padding:5px 10px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:46px;transition:all .15s;font-size:12px}
+.r-btn .rv{font-size:14px;font-weight:700;color:var(--text)}
+.r-btn .rn{font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.r-btn:hover{border-color:var(--blue);background:var(--blue-l)}
+.r-btn.sel-blue{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.r-btn.sel-blue .rv{color:var(--blue)}.r-btn.sel-blue .rn{color:var(--blue-d)}
+.r-btn.sel-teal{border-color:var(--teal);background:var(--teal-l);color:var(--teal)}
+.r-btn.sel-teal .rv{color:var(--teal)}.r-btn.sel-teal .rn{color:var(--teal-d)}
+
+/* PCT input */
+.pct-input-wrap{display:flex;align-items:center;gap:7px}
+.pct-input-wrap input{width:80px;text-align:right;font-weight:700;font-size:16px}
+.pct-suffix{font-size:18px;font-weight:700;color:var(--text3)}
+.pct-badge{font-size:11px;color:var(--teal);font-weight:600;margin-top:3px}
+
+.item-score-preview{font-size:11px;color:var(--text3);margin-top:5px;text-align:right}
+.item-score-preview span{font-weight:700;color:var(--blue)}
+
+/* SECTION SCORE BAR */
+.sim-sec-score{padding:10px 16px;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sec-score-val{font-family:'DM Serif Display',serif;font-size:28px;line-height:1}
+.sec-score-info{flex:1}
+.sec-score-lbl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.sec-score-bar-wrap{height:8px;background:var(--border);border-radius:4px;margin-top:4px;overflow:hidden;min-width:120px}
+.sec-score-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+
+/* EVAL REPORT */
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md)}
+.report-header{background:linear-gradient(135deg,var(--blue-d),var(--blue));color:#fff;padding:24px 28px}
+.report-header h3{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-bottom:4px}
+.report-header p{opacity:.8;font-size:13px}
+.report-meta{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap}
+.report-meta-item{background:rgba(255,255,255,.15);border-radius:6px;padding:7px 12px}
+.report-meta-val{font-size:20px;font-weight:700;line-height:1}
+.report-meta-lbl{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.06em}
+.report-body{padding:24px 28px}
+.report-section-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.report-section-row:last-child{border-bottom:none}
+.rs-name{font-weight:600;font-size:13px;flex:1;min-width:150px}
+.rs-score{font-family:'DM Serif Display',serif;font-size:32px;line-height:1}
+.rs-details{flex:2;min-width:200px}
+.rs-bar-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.rs-bar-track{flex:1;height:10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.rs-bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
+.rs-pct{font-size:12px;font-weight:700;white-space:nowrap}
+.rs-items-summary{font-size:11.5px;color:var(--text3);margin-top:4px;line-height:1.5}
+
+.report-final{background:linear-gradient(135deg,#f0f9ff,var(--blue-l));border:2px solid var(--blue-m);border-radius:10px;padding:20px;margin-top:18px;text-align:center}
+.report-final-num{font-family:'DM Serif Display',serif;font-size:64px;color:var(--blue);line-height:1;margin-bottom:6px}
+.report-final-cat{font-size:18px;font-weight:700;margin-bottom:4px}
+.report-final-sub{font-size:13px;color:var(--text3)}
+
+.report-item-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+.report-item-table th{background:var(--surface2);border:1px solid var(--border);padding:5px 9px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.report-item-table td{border:1px solid var(--border);padding:6px 9px;color:var(--text2)}
+.report-item-table tr:hover td{background:var(--blue-l)}
+
+@media print{
+  .app-nav,.sim-sec-head .add-btn,.sim-item-right .r-btn,.pct-input-wrap button,
+  .calc-btn,.section>button{display:none!important}
+  body{background:white}.container{padding:0}
+  .report-card{box-shadow:none;border:1px solid #ccc}
+}
+</style>
+</head>
+<body>
+
+<nav class="app-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">EvalCalc</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('t-config')">⚙️ Configuración</button>
+      <button class="nav-tab" onclick="showTab('t-calc')">🧮 Calcular</button>
+      <button class="nav-tab" onclick="showTab('t-analisis')">🔍 Análisis</button>
+      <button class="nav-tab" onclick="showTab('t-sim')">📋 Formulario</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ══════════ TAB CONFIG ══════════ -->
+<div id="t-config" class="tab-panel active">
+  <div class="page-header">
+    <div class="page-chip" style="background:var(--blue-l);color:var(--blue)">⚙️ Configuración</div>
+    <h2>Configurar <em>Evaluación de Desempeño</em></h2>
+    <p>Define escalas, ponderaciones, niveles de respuesta y los ítems del formulario de evaluación.</p>
+  </div>
+
+  <!-- MODO -->
+  <div class="section">
+    <div class="sec-title"><div class="sec-num">0</div><div class="sec-lbl">Modo de visualización de resultados</div><div class="sec-line"></div></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:600;color:var(--text2)">Mostrar resultados como:</span>
+        <div class="toggle-group">
+          <button class="tbtn active" id="btn-nota" onclick="setModo('nota')">📊 Nota</button>
+          <button class="tbtn" id="btn-pct" onclick="setModo('porcentaje')">% Porcentaje</button>
+        </div>
+      </div>
+      <div class="mode-desc" id="modo-desc"><strong style="color:var(--blue)">Nota:</strong> el resultado final se muestra como valor numérico dentro de la escala de resultados (ej. 4.33 en escala 1–5).</div>
+      <div style="margin-top:8px;padding:8px 12px;background:var(--surface2);border-left:3px solid var(--blue-m);border-radius:0 6px 6px 0;font-size:12px;color:var(--text3)">
+        <strong style="color:var(--text2)">Conversión:</strong> siempre interpolación lineal — garantiza que el mínimo de respuesta produzca el mínimo de resultado y el máximo de respuesta produzca el máximo de resultado, independiente de las escalas configuradas.
+      </div>
+    </div>
+  </div>
+
+  <!-- PONDERACIÓN -->
+  <div class="section">
+    <div class="sec-title"><div class="sec-num">1</div><div class="sec-lbl">Ponderación</div><div class="sec-line"></div></div>
+    <div class="card">
+      <div class="weight-area">
+        <div style="text-align:center"><div class="mini-title" style="margin-bottom:3px">Competencias</div><div class="weight-pct blue" id="lbl-comp-w">50%</div></div>
+        <div class="slider-wrap">
+          <input type="range" id="slider-peso" min="0" max="100" value="50" oninput="updatePeso(this.value)">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text4);margin-top:2px"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+        </div>
+        <div style="text-align:center"><div class="mini-title" style="margin-bottom:3px">Objetivos</div><div class="weight-pct teal" id="lbl-obj-w">50%</div></div>
+      </div>
+      <div style="margin-top:10px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text3)">
+        Resultado final = (<span style="color:var(--blue);font-weight:600" id="f-wc">50%</span> × resultado comp.) + (<span style="color:var(--teal);font-weight:600" id="f-wo">50%</span> × resultado obj.)
+      </div>
+    </div>
+  </div>
+
+  <!-- ESCALA RESULTADOS -->
+  <div class="section">
+    <div class="sec-title"><div class="sec-num">2</div><div class="sec-lbl">Escala de resultados (destino común)</div><div class="sec-line"></div></div>
+    <div class="escala-block">
+      <div class="escala-head"><div class="escala-head-l"><span class="escala-badge badge-green">Destino</span><span class="escala-name">Escala de Resultados Corporativos</span></div></div>
+      <div class="escala-body">
+        <div class="field-row2" style="margin-bottom:10px">
+          <div><label>Valor mínimo</label><input type="number" id="res-min" value="1" step="0.1" oninput="actualizarFormulas()"></div>
+          <div><label>Valor máximo</label><input type="number" id="res-max" value="5" step="0.1" oninput="actualizarFormulas()"></div>
+        </div>
+        <hr class="inner-sep">
+        <div class="mini-title">Niveles de resultado</div>
+        <div id="niveles-res-container"></div>
+        <button class="add-btn" onclick="agregarNivelRes()">+ Agregar nivel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESCALAS RESPUESTA -->
+  <div class="section">
+    <div class="sec-title"><div class="sec-num">3</div><div class="sec-lbl">Escalas de respuesta</div><div class="sec-line"></div></div>
+    <div class="two-col">
+
+      <!-- COMPETENCIAS -->
+      <div class="escala-block">
+        <div class="escala-head">
+          <div class="escala-head-l"><span class="escala-badge badge-blue">Competencias</span><span class="escala-name">Escala de Respuesta</span></div>
+          <div class="toggle-group" style="transform:scale(.85);transform-origin:right">
+            <button class="tbtn active" id="c-mode-esc" onclick="setRespMode('comp','escala')">Escala</button>
+            <button class="tbtn" id="c-mode-pct" onclick="setRespMode('comp','pct')">% Máx</button>
+          </div>
+        </div>
+        <div class="escala-body">
+          <div id="c-range-row" class="field-row2" style="margin-bottom:10px">
+            <div><label>Mínimo</label><input type="number" id="c-min" value="1" step="0.1" oninput="actualizarFormulas()"></div>
+            <div><label>Máximo</label><input type="number" id="c-max" value="4" step="0.1" oninput="actualizarFormulas()"></div>
+          </div>
+          <div id="c-pct-row" style="display:none;margin-bottom:10px">
+            <label>Máximo permitido (valor = 100%)</label>
+            <input type="number" id="c-max-pct" value="100" step="1" oninput="actualizarFormulas()">
+          </div>
+          <div id="c-range-warn" style="display:none;margin-bottom:8px;padding:7px 11px;background:var(--amber-l);border-left:3px solid var(--amber);border-radius:0 5px 5px 0;font-size:12px;color:var(--text2)"></div>
+          <hr class="inner-sep">
+          <div class="mini-title">Opciones de respuesta</div>
+          <div id="c-resp-container"></div>
+          <button class="add-btn" onclick="agregarNivelResp('comp')">+ Agregar opción</button>
+        </div>
+      </div>
+
+      <!-- OBJETIVOS -->
+      <div class="escala-block">
+        <div class="escala-head">
+          <div class="escala-head-l"><span class="escala-badge badge-teal">Objetivos</span><span class="escala-name">Escala de Respuesta</span></div>
+          <div class="toggle-group" style="transform:scale(.85);transform-origin:right">
+            <button class="tbtn active" id="o-mode-esc" onclick="setRespMode('obj','escala')">Escala</button>
+            <button class="tbtn" id="o-mode-rng" onclick="setRespMode('obj','rango')">Rango</button>
+            <button class="tbtn" id="o-mode-pct" onclick="setRespMode('obj','pct')">% Máx</button>
+          </div>
+        </div>
+        <div class="escala-body">
+          <div id="o-range-row" class="field-row2" style="margin-bottom:10px">
+            <div><label>Mínimo</label><input type="number" id="o-min" value="0" step="0.1" oninput="actualizarFormulas()"></div>
+            <div><label>Máximo</label><input type="number" id="o-max" value="100" step="0.1" oninput="actualizarFormulas()"></div>
+          </div>
+          <div id="o-pct-row" style="display:none;margin-bottom:10px">
+            <div class="field-row2">
+              <div><label>Máximo permitido (%)</label><input type="number" id="o-max-pct" value="120" step="1" oninput="actualizarFormulas()"></div>
+              <div><label>% mínimo esperado</label><input type="number" id="o-min-pct" value="0" step="1" oninput="actualizarFormulas()"></div>
+            </div>
+          </div>
+          <!-- RANGO INFO -->
+          <div id="o-rng-info" style="display:none;margin-bottom:10px;padding:10px 13px;background:var(--teal-l);border-left:3px solid var(--teal);border-radius:0 6px 6px 0;font-size:12.5px;color:var(--text2)">
+            <strong style="color:var(--teal)">Modo Rango:</strong> el evaluador ingresa libremente cualquier número entre el mínimo y el máximo definidos arriba. No hay opciones discretas — se convierte directamente a la escala de resultados.
+          </div>
+          <div id="o-range-warn" style="display:none;margin-bottom:8px;padding:7px 11px;background:var(--amber-l);border-left:3px solid var(--amber);border-radius:0 5px 5px 0;font-size:12px;color:var(--text2)"></div>
+          <hr class="inner-sep">
+          <div class="mini-title" id="o-resp-title">Opciones de respuesta</div>
+          <div id="o-resp-container"></div>
+          <button class="add-btn" id="o-add-resp-btn" onclick="agregarNivelResp('obj')">+ Agregar opción</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÍTEMS DEL FORMULARIO -->
+  <div class="section">
+    <div class="sec-title"><div class="sec-num">4</div><div class="sec-lbl">Ítems del formulario de evaluación</div><div class="sec-line"></div></div>
+    <div class="two-col">
+
+      <!-- Ítems Competencias -->
+      <div class="escala-block">
+        <div class="escala-head blue-head" style="background:linear-gradient(135deg,var(--blue-l),#eff6ff)">
+          <div class="escala-head-l"><span class="escala-badge badge-blue">🎯</span><span class="escala-name">Competencias a evaluar</span></div>
+          <button class="add-btn" style="width:auto;margin:0;padding:5px 12px" onclick="agregarItem('comp')">+ Agregar</button>
+        </div>
+        <div class="escala-body">
+          <div id="items-comp-container"></div>
+        </div>
+      </div>
+
+      <!-- Ítems Objetivos -->
+      <div class="escala-block">
+        <div class="escala-head teal-head" style="background:linear-gradient(135deg,var(--teal-l),#f0fdfe)">
+          <div class="escala-head-l"><span class="escala-badge badge-teal">📈</span><span class="escala-name">Objetivos a evaluar</span></div>
+          <button class="add-btn" style="width:auto;margin:0;padding:5px 12px;border-color:var(--teal)" onclick="agregarItem('obj')">+ Agregar</button>
+        </div>
+        <div class="escala-body">
+          <div id="items-obj-container"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TAB CALCULAR ══════════ -->
+<div id="t-calc" class="tab-panel">
+  <div class="page-header">
+    <div class="page-chip" style="background:var(--blue-l);color:var(--blue)">🧮 Calcular</div>
+    <h2>Calcular <em>Resultado Integrado</em></h2>
+    <p>Ingresa los valores de cada componente. El resultado combina ambos según la ponderación.</p>
+  </div>
+  <div class="section">
+    <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 18px">
+      <div class="w-badge">🎯 Comp. <span id="c-w-badge">50%</span></div>
+      <span style="color:var(--text4)">+</span>
+      <div class="w-badge" style="background:var(--teal-l);color:var(--teal);border-color:var(--teal)">📈 Obj. <span id="o-w-badge">50%</span></div>
+      <span style="color:var(--text4)">=</span>
+      <div style="font-size:13px;font-weight:600;color:var(--text2)">Resultado en escala <span id="res-range-badge">(1–5)</span></div>
+      <button style="margin-left:auto;background:none;border:1px solid var(--border);color:var(--text3);font-size:12px;padding:4px 11px;border-radius:6px;cursor:pointer" onclick="showTab('t-config')">⚙️ Config.</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title"><div class="sec-num">1</div><div class="sec-lbl">Valores de entrada</div><div class="sec-line"></div></div>
+    <div class="two-col">
+      <div class="escala-block">
+        <div class="escala-head"><div class="escala-head-l"><span class="escala-badge badge-blue">🎯</span><span class="escala-name">Competencias</span></div><span id="c-range-hint" style="font-size:12px;color:var(--text3)">rango 1–4</span></div>
+        <div class="escala-body">
+          <div class="input-row"><div class="field"><label>Valor obtenido</label><input type="number" id="c-val" placeholder="Ej: 3" step="0.1"></div></div>
+          <div class="mini-title" style="margin-top:11px">Selección rápida</div>
+          <div class="quick-btns" id="c-quick"></div>
+          <div class="formula-box" id="c-formula">res_comp = ((x−<span class="fv" id="fc-minr">1</span>)/(<span class="fv" id="fc-maxr">4</span>−<span class="fv" id="fc-minr2">1</span>))×(<span class="fv" id="fc-maxres">5</span>−<span class="fv" id="fc-minres">1</span>)+<span class="fv" id="fc-minres2">1</span></div>
+          <div style="margin-top:8px;padding:7px 11px;background:var(--blue-l);border-radius:6px;font-size:11.5px;color:var(--blue-d);font-weight:500">Aporte al resultado: <span id="c-contrib-lbl">—</span></div>
+        </div>
+      </div>
+      <div class="escala-block">
+        <div class="escala-head"><div class="escala-head-l"><span class="escala-badge badge-teal">📈</span><span class="escala-name">Objetivos</span></div><span id="o-range-hint" style="font-size:12px;color:var(--text3)">rango 0–100</span></div>
+        <div class="escala-body">
+          <div class="input-row"><div class="field"><label id="o-val-label">Valor / % cumplimiento</label><input type="number" id="o-val" placeholder="Ej: 85" step="0.1"></div></div>
+          <div class="mini-title" style="margin-top:11px">Selección rápida</div>
+          <div class="quick-btns" id="o-quick"></div>
+          <div class="formula-box" style="border-left-color:var(--teal)" id="o-formula">res_obj = ((x−<span class="fv2" id="fo-minr">0</span>)/(<span class="fv2" id="fo-maxr">100</span>−<span class="fv2" id="fo-minr2">0</span>))×(<span class="fv2" id="fo-maxres">5</span>−<span class="fv2" id="fo-minres">1</span>)+<span class="fv2" id="fo-minres2">1</span></div>
+          <div style="margin-top:8px;padding:7px 11px;background:var(--teal-l);border-radius:6px;font-size:11.5px;color:var(--teal-d);font-weight:500">Aporte al resultado: <span id="o-contrib-lbl">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="err-msg" id="calc-err"></div>
+  </div>
+  <div class="section"><button class="calc-btn full" onclick="calcularIntegrado()">Calcular resultado integrado →</button></div>
+  <div class="section result-panel" id="result-panel">
+    <div class="sec-title"><div class="sec-num">2</div><div class="sec-lbl">Resultado integrado</div><div class="sec-line"></div></div>
+    <div class="breakdown-grid">
+      <div class="bdown-card bc-blue"><div class="bc-lbl">🎯 Competencias (<span id="bc-cw">50%</span>)</div><div class="bc-val" id="bc-comp" style="color:var(--blue)">—</div><div class="bc-sub" id="bc-comp-sub">—</div></div>
+      <div class="bdown-card bc-teal"><div class="bc-lbl">📈 Objetivos (<span id="bc-ow">50%</span>)</div><div class="bc-val" id="bc-obj" style="color:var(--teal)">—</div><div class="bc-sub" id="bc-obj-sub">—</div></div>
+    </div>
+    <div class="card card-blue" style="margin-bottom:14px">
+      <div class="result-hero"><div class="result-big" id="r-final">—</div><div class="result-info"><h3 id="r-cat">—</h3><span class="result-badge" id="r-badge">—</span><div class="result-sub" id="r-desc">—</div></div></div>
+      <div id="r-bars"></div>
+    </div>
+    <div class="stat-grid" id="r-stats"></div>
+  </div>
+</div>
+
+<!-- ══════════ TAB ANÁLISIS ══════════ -->
+<div id="t-analisis" class="tab-panel">
+  <div class="page-header">
+    <div class="page-chip" style="background:var(--purple-l);color:var(--purple)">🔍 Análisis</div>
+    <h2><em>Análisis de Coherencia</em> de Escalas</h2>
+    <p>Diagnóstico estructurado de 7 pasos para determinar si las escalas requieren reescalamiento y qué impacto tiene en los resultados.</p>
+  </div>
+  <div class="section">
+    <div class="card" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:13px;color:var(--text3)">Genera el análisis completo con la configuración actual:</span>
+      <button class="calc-btn" onclick="generarAnalisis()">🔍 Generar análisis de coherencia</button>
+    </div>
+  </div>
+  <div id="analisis-output" style="display:none">
+
+    <!-- COHERENCIA COMP -->
+    <div class="section">
+      <div class="sec-title"><div class="sec-num" style="background:var(--blue)">🎯</div><div class="sec-lbl">Análisis de coherencia — Competencias</div><div class="sec-line"></div></div>
+      <div id="coherencia-comp"></div>
+    </div>
+
+    <!-- COHERENCIA OBJ -->
+    <div class="section">
+      <div class="sec-title"><div class="sec-num" style="background:var(--teal)">📈</div><div class="sec-lbl">Análisis de coherencia — Objetivos</div><div class="sec-line"></div></div>
+      <div id="coherencia-obj"></div>
+    </div>
+
+    <!-- TABLAS CONVERSIÓN -->
+    <div class="section">
+      <div class="sec-title"><div class="sec-num" style="background:var(--blue)">1</div><div class="sec-lbl">Tabla de conversión — Competencias</div><div class="sec-line"></div></div>
+      <div class="card" style="overflow-x:auto"><div id="an-c-table"></div></div>
+    </div>
+    <div class="section">
+      <div class="sec-title"><div class="sec-num" style="background:var(--teal)">2</div><div class="sec-lbl">Tabla de conversión — Objetivos</div><div class="sec-line"></div></div>
+      <div class="card" style="overflow-x:auto"><div id="an-o-table"></div></div>
+    </div>
+    <div class="section">
+      <div class="sec-title"><div class="sec-num" style="background:var(--purple)">3</div><div class="sec-lbl">Escenarios de resultado integrado</div><div class="sec-line"></div></div>
+      <div class="card" style="overflow-x:auto"><div id="an-combined-table"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TAB SIMULADOR ══════════ -->
+<div id="t-sim" class="tab-panel">
+  <div class="page-header">
+    <div class="page-chip" style="background:var(--purple-l);color:var(--purple)">📋 Formulario</div>
+    <h2>Simulador de <em>Formulario de Evaluación</em></h2>
+    <p>Completa la evaluación seleccionando el valor para cada competencia y objetivo. El informe final se genera automáticamente.</p>
+  </div>
+
+  <!-- Datos del evaluado -->
+  <div class="section">
+    <div class="sec-title"><div class="sec-num" style="background:var(--purple)">0</div><div class="sec-lbl">Datos del evaluado</div><div class="sec-line"></div></div>
+    <div class="card">
+      <div class="field-row3">
+        <div><label>Nombre completo</label><input type="text" id="ev-nombre" placeholder="Ej: María González"></div>
+        <div><label>Cargo</label><input type="text" id="ev-cargo" placeholder="Ej: Analista Senior"></div>
+        <div><label>Período de evaluación</label><input type="text" id="ev-periodo" placeholder="Ej: 2024 — Semestral"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div id="sim-form-container">
+    <div style="padding:32px;text-align:center;color:var(--text3)">
+      <div style="font-size:32px;margin-bottom:10px">📋</div>
+      <p>Configura los ítems en la pestaña <strong>Configuración → Sección 4</strong> y vuelve aquí para evaluar.</p>
+      <button class="calc-btn" style="margin-top:14px" onclick="showTab('t-config')">⚙️ Ir a configuración</button>
+    </div>
+  </div>
+
+  <!-- BTN GENERAR INFORME -->
+  <div class="section" id="sim-btn-row" style="display:none">
+    <button class="calc-btn full" style="background:var(--purple)" onclick="generarInforme()">📄 Generar informe de evaluación</button>
+  </div>
+
+  <!-- INFORME -->
+  <div id="sim-report" style="display:none">
+    <div class="sec-title"><div class="sec-num" style="background:var(--purple)">★</div><div class="sec-lbl">Informe de Evaluación de Desempeño</div><div class="sec-line"></div>
+      <button onclick="window.print()" style="background:none;border:1px solid var(--border);color:var(--text3);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">🖨 Imprimir</button>
+    </div>
+    <div class="report-card" id="report-content"></div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ════════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════════
+const S = {
+  modo:'nota', metodo:'interpolacion', pesoComp:50, resMin:1, resMax:5,
+  comp:{ respMode:'escala',
+    nivelesResp:[{nombre:'Nunca',valor:1},{nombre:'A veces',valor:2},{nombre:'Casi siempre',valor:3},{nombre:'Siempre',valor:4}],
+    items:[] },
+  obj:{ respMode:'escala',
+    nivelesResp:[{nombre:'Bajo',valor:50},{nombre:'Parcial',valor:75},{nombre:'Cumplido',valor:100},{nombre:'Superior',valor:120}],
+    items:[] },
+  niveles:[
+    {nombre:'Deficiente',min:1,max:2,color:'#dc2626'},
+    {nombre:'Regular',min:2,max:3,color:'#d97706'},
+    {nombre:'Bueno',min:3,max:4,color:'#2563eb'},
+    {nombre:'Excelente',min:4,max:5,color:'#059669'},
+  ]
+};
+
+// Estado del formulario (valores ingresados en el simulador)
+const FORM = { comp:{}, obj:{} };
+
+// ── TABS ──────────────────────────────────
+function showTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  ['t-config','t-calc','t-analisis','t-sim'].forEach((t,i)=>{
+    if(t===id) document.querySelectorAll('.nav-tab')[i].classList.add('active');
+  });
+  if(id==='t-calc') syncCalcView();
+  if(id==='t-sim') renderSimForm();
+}
+
+// ── MODO ──────────────────────────────────
+function setModo(m){
+  S.modo=m;
+  document.getElementById('btn-nota').classList.toggle('active',m==='nota');
+  document.getElementById('btn-pct').classList.toggle('active',m==='porcentaje');
+  const desc=document.getElementById('modo-desc');
+  if(m==='nota') desc.innerHTML='<strong style="color:var(--blue)">Nota:</strong> resultado como valor numérico reescalado (ej. 4.33 en escala 1–5).';
+  else desc.innerHTML='<strong style="color:var(--blue)">Porcentaje:</strong> resultado como % de logro sobre el máximo posible de la escala de resultados.';
+}
+
+function setMetodo(m){
+  S.metodo=m;
+  document.getElementById('btn-interp').classList.toggle('active',m==='interpolacion');
+  document.getElementById('btn-regla3').classList.toggle('active',m==='regla3');
+  const desc=document.getElementById('metodo-desc');
+  if(m==='interpolacion') desc.innerHTML='<strong style="color:var(--blue-d)">Interpolación lineal:</strong> resultado = ((x − mín) / (máx − mín)) × rango destino + mín destino. Considera ambos extremos de cada escala.';
+  else desc.innerHTML='<strong style="color:var(--blue-d)">Regla de 3:</strong> resultado = (x / máx respuesta) × máx resultado. Proporción directa desde 0 — si el máximo de respuesta vale <em>máxRes</em>, ¿cuánto vale x?';
+  actualizarFormulas();
+}
+
+// ── REESCALAR ──────────────────────────────
+function reescalar(x,minR,maxR,minRes,maxRes){
+  if(maxR===minR) return minRes;
+  if(S.metodo==='regla3'){
+    // Regla de 3 pura: x/maxR * maxRes (proporcional desde 0)
+    if(maxR===0) return minRes;
+    return (x/maxR)*maxRes;
+  }
+  // Interpolación lineal (default)
+  return ((x-minR)/(maxR-minR))*(maxRes-minRes)+minRes;
+}
+function updatePeso(v){
+  S.pesoComp=parseInt(v);
+  const po=100-S.pesoComp;
+  ['lbl-comp-w','c-w-badge','bc-cw'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=S.pesoComp+'%'; });
+  ['lbl-obj-w','o-w-badge','bc-ow'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=po+'%'; });
+  document.getElementById('f-wc').textContent=S.pesoComp+'%';
+  document.getElementById('f-wo').textContent=po+'%';
+  const sl=document.getElementById('slider-peso');
+  sl.style.background=`linear-gradient(to right,var(--blue) 0%,var(--blue) ${S.pesoComp}%,var(--teal) ${S.pesoComp}%,var(--teal) 100%)`;
+  syncCalcView();
+}
+
+// ── RESP MODE ──────────────────────────────
+function setRespMode(sc,m){
+  S[sc].respMode=m;
+  const p=sc==='comp'?'c':'o';
+  // Comp only has escala / pct
+  document.getElementById(`${p}-mode-esc`).classList.toggle('active',m==='escala');
+  document.getElementById(`${p}-mode-pct`).classList.toggle('active',m==='pct');
+  document.getElementById(`${p}-range-row`).style.display=(m==='escala'||m==='rango')?'':'none';
+  document.getElementById(`${p}-pct-row`).style.display=m==='pct'?'':'none';
+  if(sc==='obj'){
+    // rango toggle btn
+    const rngBtn=document.getElementById('o-mode-rng');
+    if(rngBtn) rngBtn.classList.toggle('active',m==='rango');
+    // rango info box
+    const rngInfo=document.getElementById('o-rng-info');
+    if(rngInfo) rngInfo.style.display=m==='rango'?'':'none';
+    // hide/show opciones section when rango
+    const respCont=document.getElementById('o-resp-container');
+    const addBtn=document.getElementById('o-add-resp-btn');
+    const respTitle=document.getElementById('o-resp-title');
+    if(respCont) respCont.style.display=m==='rango'?'none':'';
+    if(addBtn)   addBtn.style.display=m==='rango'?'none':'';
+    if(respTitle) respTitle.style.display=m==='rango'?'none':'';
+    const lbl=document.getElementById('o-val-label');
+    if(lbl) lbl.textContent=m==='pct'?'% cumplimiento (0–máx)':m==='rango'?`Valor libre (${getRango('obj').min}–${getRango('obj').max})`:'Valor obtenido';
+    // update range hint label
+    const hint=document.getElementById('o-range-hint');
+    if(hint){ const r=getRango('obj'); hint.textContent=`rango ${isNaN(r.min)?'?':r.min}–${isNaN(r.max)?'?':r.max}`; }
+  }
+  actualizarFormulas(); syncCalcView();
+}
+
+// ── RANGO RESPUESTA ────────────────────────
+function getRango(sc){
+  const p=sc==='comp'?'c':'o';
+  if(S[sc].respMode==='pct'){
+    const mx=parseFloat(document.getElementById(`${p}-max-pct`).value)||100;
+    const mn=sc==='obj'?(parseFloat(document.getElementById('o-min-pct').value)||0):0;
+    return {min:mn, max:mx, isPct:true, isRango:false};
+  }
+  const min=parseFloat(document.getElementById(`${p}-min`).value);
+  const max=parseFloat(document.getElementById(`${p}-max`).value);
+  return { min, max, isPct:false, isRango: S[sc].respMode==='rango' };
+}
+
+// ── REESCALAR ──────────────────────────────
+// Interpolación lineal: minR→minRes, maxR→maxRes
+// Esta es la única fórmula que garantiza que el máximo de respuesta
+// siempre produzca el máximo de resultado, independiente del offset
+// de inicio. Equivale a regla de 3 cuando minR=minRes=0.
+// El clamp evita que valores fuera del rango configuren resultados imposibles.
+function reescalar(x, minR, maxR, minRes, maxRes){
+  if(maxR === minR) return minRes;
+  const raw = ((x - minR) / (maxR - minR)) * (maxRes - minRes) + minRes;
+  return Math.min(maxRes, Math.max(minRes, raw));
+}
+
+// ── FORMATO ───────────────────────────────
+function fmt(v,minRes,maxRes){
+  if(S.modo==='porcentaje') return Math.round(((v-minRes)/(maxRes-minRes))*100)+'%';
+  return v.toFixed(2);
+}
+function fmtRaw(v){
+  if(S.modo==='porcentaje') return Math.round(((v-S.resMin)/(S.resMax-S.resMin))*100)+'%';
+  return v.toFixed(2);
+}
+
+// ── FORMULAS display ──────────────────────
+function actualizarFormulas(){
+  S.resMin=parseFloat(document.getElementById('res-min').value)||1;
+  S.resMax=parseFloat(document.getElementById('res-max').value)||5;
+  ['comp','obj'].forEach(sc=>{
+    const r=getRango(sc); const pre=sc==='comp'?'fc':'fo'; const p=sc==='comp'?'c':'o';
+    const minR=isNaN(r.min)?'?':r.min; const maxR=isNaN(r.max)?'?':r.max;
+    const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+    set(`${pre}-minr`,minR); set(`${pre}-maxr`,maxR); set(`${pre}-minr2`,minR);
+    set(`${pre}-maxres`,S.resMax); set(`${pre}-minres`,S.resMin); set(`${pre}-minres2`,S.resMin);
+    // Update formula box to always show interpolation
+    const fbox=document.getElementById(`${p}-formula`);
+    if(fbox){
+      const factor = (maxR!=='?'&&minR!=='?'&&maxR!==minR)?((S.resMax-S.resMin)/(maxR-minR)).toFixed(4):'?';
+      fbox.innerHTML=`res = ((x−<span class="${p==='c'?'fv':'fv2'}">${minR}</span>)/(<span class="${p==='c'?'fv':'fv2'}">${maxR}</span>−<span class="${p==='c'?'fv':'fv2'}">${minR}</span>))×(<span class="${p==='c'?'fv':'fv2'}">${S.resMax}</span>−<span class="${p==='c'?'fv':'fv2'}">${S.resMin}</span>)+<span class="${p==='c'?'fv':'fv2'}">${S.resMin}</span> &nbsp;<em style="color:var(--text4);font-size:10px">factor ×${factor}</em>`;
+    }
+    // Warn if any configured option exceeds the max field
+    const maxOpc=Math.max(...S[sc].nivelesResp.map(n=>parseFloat(n.valor)||0));
+    const warnEl=document.getElementById(`${p}-range-warn`);
+    if(warnEl){
+      if(!isNaN(maxOpc)&&!isNaN(parseFloat(maxR))&&maxOpc>parseFloat(maxR)+0.001){
+        warnEl.style.display='block';
+        warnEl.textContent=`⚠ La opción "${maxOpc}" supera el máximo (${maxR}). Actualiza el campo "Máximo" a ${maxOpc} para incluirla correctamente.`;
+      } else { warnEl.style.display='none'; }
+    }
+    const hint=document.getElementById(`${p}-range-hint`); if(hint) hint.textContent=`rango ${minR}–${maxR}`;
+  });
+  const rb=document.getElementById('res-range-badge'); if(rb) rb.textContent=`(${S.resMin}–${S.resMax})`;
+}
+// ── RENDER NIVELES RES ────────────────────
+function renderNivelesRes(){
+  const c=document.getElementById('niveles-res-container'); c.innerHTML='';
+  const h=document.createElement('div'); h.className='nivel-row-res'; h.style.marginBottom='6px';
+  h.innerHTML=`<div class="col-lbl">Nombre</div><div class="col-lbl">Desde</div><div class="col-lbl">Hasta</div><div></div>`;
+  c.appendChild(h);
+  S.niveles.forEach((n,i)=>{
+    const row=document.createElement('div'); row.className='nivel-row-res'; row.style.marginBottom='6px';
+    row.innerHTML=`<div><input type="text" value="${n.nombre}" oninput="S.niveles[${i}].nombre=this.value"></div>
+    <div><input type="number" value="${n.min}" step="0.1" oninput="S.niveles[${i}].min=parseFloat(this.value)"></div>
+    <div><input type="number" value="${n.max}" step="0.1" oninput="S.niveles[${i}].max=parseFloat(this.value)"></div>
+    ${S.niveles.length>1?`<button class="rm-btn" onclick="quitarNivelRes(${i})">×</button>`:'<div></div>'}`;
+    c.appendChild(row);
+  });
+}
+function agregarNivelRes(){ const cols=['#dc2626','#d97706','#2563eb','#059669','#7c3aed','#db2777']; S.niveles.push({nombre:'Nuevo',min:0,max:0,color:cols[S.niveles.length%cols.length]}); renderNivelesRes(); }
+function quitarNivelRes(i){ if(S.niveles.length>1){S.niveles.splice(i,1);renderNivelesRes();} }
+
+// ── RENDER NIVELES RESP ────────────────────
+function renderNivelesResp(sc){
+  const p=sc==='comp'?'c':'o'; const c=document.getElementById(`${p}-resp-container`); c.innerHTML='';
+  const data=S[sc].nivelesResp;
+  const h=document.createElement('div'); h.className='nivel-row-r'; h.style.marginBottom='6px';
+  h.innerHTML=`<div class="col-lbl">Nombre / etiqueta</div><div class="col-lbl">Valor</div><div></div>`;
+  c.appendChild(h);
+  data.forEach((n,i)=>{
+    const row=document.createElement('div'); row.className='nivel-row-r'; row.style.marginBottom='6px';
+    row.innerHTML=`<div><input type="text" value="${n.nombre}" oninput="S['${sc}'].nivelesResp[${i}].nombre=this.value;renderQuick('${sc}')"></div>
+    <div><input type="number" value="${n.valor}" step="0.1" oninput="S['${sc}'].nivelesResp[${i}].valor=parseFloat(this.value);renderQuick('${sc}')"></div>
+    ${data.length>1?`<button class="rm-btn" onclick="quitarNivelResp('${sc}',${i})">×</button>`:'<div></div>'}`;
+    c.appendChild(row);
+  });
+  renderQuick(sc);
+}
+function agregarNivelResp(sc){ const mx=Math.max(...S[sc].nivelesResp.map(n=>parseFloat(n.valor)||0)); S[sc].nivelesResp.push({nombre:'Nueva',valor:mx+1}); renderNivelesResp(sc); }
+function quitarNivelResp(sc,i){ if(S[sc].nivelesResp.length>1){S[sc].nivelesResp.splice(i,1);renderNivelesResp(sc);} }
+
+// ── QUICK BTNS ────────────────────────────
+function renderQuick(sc){
+  const p=sc==='comp'?'c':'o'; const wrap=document.getElementById(`${p}-quick`); wrap.innerHTML='';
+  S[sc].nivelesResp.forEach(n=>{
+    if(isNaN(parseFloat(n.valor))) return;
+    const btn=document.createElement('button'); btn.className='qbtn';
+    btn.innerHTML=`<span class="qv">${n.valor}</span><span class="qn">${n.nombre}</span>`;
+    btn.onclick=()=>{
+      document.getElementById(`${p}-val`).value=n.valor;
+      wrap.querySelectorAll('.qbtn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel');
+      previewAporte(sc,parseFloat(n.valor));
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function previewAporte(sc,val){
+  const r=getRango(sc); if(isNaN(r.min)||isNaN(r.max)||isNaN(val)) return;
+  const rv=reescalar(val,r.min,r.max,S.resMin,S.resMax);
+  const peso=sc==='comp'?S.pesoComp/100:(100-S.pesoComp)/100;
+  const id=sc==='comp'?'c-contrib-lbl':'o-contrib-lbl';
+  const nivel=S.niveles.find(n=>rv>=n.min&&rv<=n.max)||S.niveles[0];
+  document.getElementById(id).textContent=`${fmtRaw(rv)} × ${Math.round(peso*100)}% → ${fmtRaw(rv*peso)} · ${nivel.nombre}`;
+}
+
+// ── SYNC CALC VIEW ────────────────────────
+function syncCalcView(){
+  const po=100-S.pesoComp;
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  s('c-w-badge',S.pesoComp+'%'); s('o-w-badge',po+'%'); s('bc-cw',S.pesoComp+'%'); s('bc-ow',po+'%');
+  s('res-range-badge',`(${S.resMin}–${S.resMax})`);
+  renderQuick('comp'); renderQuick('obj'); actualizarFormulas();
+}
+
+// ── CALCULAR INTEGRADO ────────────────────
+function calcularIntegrado(){
+  const cV=parseFloat(document.getElementById('c-val').value);
+  const oV=parseFloat(document.getElementById('o-val').value);
+  const rC=getRango('comp'); const rO=getRango('obj');
+  const err=document.getElementById('calc-err');
+
+  // At least one must be filled
+  const hasC=!isNaN(cV); const hasO=!isNaN(oV);
+  if(!hasC&&!hasO){err.className='err-msg show';err.textContent='⚠ Ingresa al menos un valor (Competencias u Objetivos).';return;}
+  if(hasC&&(cV<rC.min||cV>rC.max)){err.className='err-msg show';err.textContent=`⚠ Valor Competencias (${cV}) fuera de rango (${rC.min}–${rC.max}).`;return;}
+  if(hasO&&(oV<rO.min||oV>rO.max)){err.className='err-msg show';err.textContent=`⚠ Valor Objetivos (${oV}) fuera de rango (${rO.min}–${rO.max}).`;return;}
+  err.className='err-msg';
+
+  const resC=hasC?reescalar(cV,rC.min,rC.max,S.resMin,S.resMax):null;
+  const resO=hasO?reescalar(oV,rO.min,rO.max,S.resMin,S.resMax):null;
+
+  // Weighted final — adjust weights if only one section
+  let final;
+  if(hasC&&hasO){ const wC=S.pesoComp/100; final=resC*wC+resO*(1-wC); }
+  else if(hasC){ final=resC; }
+  else { final=resO; }
+
+  const nivel=S.niveles.find(n=>final>=n.min&&final<=n.max)||S.niveles[0];
+
+  // Breakdown cards — show or hide
+  const bcCompEl=document.getElementById('bc-comp');
+  const bcObjEl=document.getElementById('bc-obj');
+  if(bcCompEl){
+    bcCompEl.textContent=hasC?fmtRaw(resC):'N/A';
+    document.getElementById('bc-comp-sub').textContent=hasC
+      ?`Val ${cV} → ${fmtRaw(resC)} · aporte: ${fmtRaw(resC*(hasO?S.pesoComp/100:1))}`
+      :'No evaluado';
+  }
+  if(bcObjEl){
+    bcObjEl.textContent=hasO?fmtRaw(resO):'N/A';
+    document.getElementById('bc-obj-sub').textContent=hasO
+      ?`Val ${oV} → ${fmtRaw(resO)} · aporte: ${fmtRaw(resO*(hasC?(100-S.pesoComp)/100:1))}`
+      :'No evaluado';
+  }
+
+  const valFmt=fmt(final,S.resMin,S.resMax);
+  document.getElementById('r-final').textContent=valFmt;
+  document.getElementById('r-cat').textContent=nivel.nombre;
+  const badge=document.getElementById('r-badge');
+  badge.textContent=nivel.nombre; badge.style.background=nivel.color+'22'; badge.style.color=nivel.color; badge.style.border=`1px solid ${nivel.color}55`;
+
+  const pctC=hasC?Math.round(((resC-S.resMin)/(S.resMax-S.resMin))*100):null;
+  const pctO=hasO?Math.round(((resO-S.resMin)/(S.resMax-S.resMin))*100):null;
+  const pctF=Math.round(((final-S.resMin)/(S.resMax-S.resMin))*100);
+
+  let descParts=[];
+  if(hasC) descParts.push(`Comp: ${fmtRaw(resC)} (${pctC}%)${hasO?` ×${S.pesoComp}%`:''}`);
+  if(hasO) descParts.push(`Obj: ${fmtRaw(resO)} (${pctO}%)${hasC?` ×${100-S.pesoComp}%`:''}`);
+  document.getElementById('r-desc').innerHTML=descParts.join(' + ')+` = <strong>${valFmt}</strong>`;
+
+  const bars=document.getElementById('r-bars'); bars.innerHTML='';
+  const tr=S.resMax-S.resMin;
+  S.niveles.forEach(n=>{
+    const isCur=final>=n.min&&final<=n.max; const pct=Math.max(0,Math.min(100,((n.max-n.min)/tr)*100));
+    const rL=S.modo==='porcentaje'
+      ?`${Math.round(((n.min-S.resMin)/tr)*100)}%–${Math.round(((n.max-S.resMin)/tr)*100)}%`
+      :`${n.min}–${n.max}`;
+    const row=document.createElement('div'); row.className='bar-row';
+    row.innerHTML=`<div class="bar-name">${n.nombre}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${n.color}22;border-right:3px solid ${n.color};">${isCur?'<span class="dot-pulse"></span>':''}</div></div><div class="bar-val" style="color:${isCur?n.color:'var(--text4)'};font-weight:${isCur?700:400}">${rL}</div>`;
+    bars.appendChild(row);
+  });
+
+  const statsData=[];
+  if(hasC){ statsData.push({v:fmtRaw(resC),l:'Resultado Comp.'},{v:pctC+'%',l:'% Logro Comp.'}); }
+  if(hasO){ statsData.push({v:fmtRaw(resO),l:'Resultado Obj.'},{v:pctO+'%',l:'% Logro Obj.'}); }
+  statsData.push({v:valFmt,l:'Resultado Final'},{v:pctF+'%',l:'% Logro Final'});
+  document.getElementById('r-stats').innerHTML=statsData.map(s=>`<div class="stat-card"><div class="stat-val">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join('');
+
+  const panel=document.getElementById('result-panel'); panel.classList.add('show');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ════════════════════════════════════════════
+// ANÁLISIS
+// ════════════════════════════════════════════
+function diagEscala(sc,iconEl,titleEl,subEl,bodyEl){
+  const r=getRango(sc); const minR=r.min,maxR=r.max,minRes=S.resMin,maxRes=S.resMax;
+  const rangoR=maxR-minR; const rangoRes=maxRes-minRes; const factor=rangoRes/rangoR;
+  const esIgual=(minR===minRes&&maxR===maxRes); const mismaAmp=Math.abs(rangoR-rangoRes)<0.001;
+  const nombre=sc==='comp'?'Competencias':'Objetivos';
+  const color=sc==='comp'?'var(--blue)':'var(--teal)';
+  const bgL=sc==='comp'?'var(--blue-l)':'var(--teal-l)';
+  let banners=[];
+
+  // Caso especial: objetivos en modo rango libre
+  if(sc==='obj' && r.isRango){
+    const factor2=rangoRes/rangoR;
+    const midVal=(maxR+minR)/2;
+    iconEl.innerHTML='↔️'; iconEl.style.background='var(--teal-l)';
+    titleEl.textContent='Modo rango libre — el evaluador ingresa cualquier valor entre el mínimo y el máximo';
+    subEl.textContent=`Objetivos: entrada libre entre ${minR} y ${maxR}, convertida a la escala de resultados.`;
+    banners.push({cls:'bteal',icon:'↔️',title:'Cómo funciona el modo Rango',
+      text:`El evaluador puede ingresar cualquier número decimal entre ${minR} y ${maxR}. No hay opciones fijas ni etiquetas — el valor se toma tal cual y se reescala linealmente a la escala de resultados (${minRes}–${maxRes}). Esto da máxima flexibilidad para objetivos con cumplimiento continuo como porcentajes de presupuesto, horas, unidades, etc.`});
+    banners.push({cls:'binfo',icon:'📐',title:'Fórmula de conversión',
+      text:`resultado = ((x − ${minR}) / (${maxR} − ${minR})) × (${maxRes} − ${minRes}) + ${minRes}. Factor de escala: ×${factor2.toFixed(4)}. Ejemplo: valor ${midVal} → ${reescalar(midVal,minR,maxR,minRes,maxRes).toFixed(2)}, valor ${maxR} → ${maxRes}.`});
+    if(Math.abs(rangoR-rangoRes)>0.001){
+      const comprime=rangoRes<rangoR;
+      banners.push({cls:comprime?'bwarn':'bok',icon:comprime?'⚠️':'📈',
+        title:comprime?'Compresión de escala':'Expansión de escala',
+        text:comprime
+          ?`Rango respuesta (${rangoR}) > rango resultado (${rangoRes}). Cada unidad de entrada equivale a ${factor2.toFixed(4)} unidades en resultado. Se pierde algo de discriminación.`
+          :`Rango respuesta (${rangoR}) < rango resultado (${rangoRes}). Cada unidad de entrada equivale a ${factor2.toFixed(4)} unidades en resultado. Mayor discriminación.`});
+    } else {
+      banners.push({cls:'bok',icon:'✅',title:'Amplitudes iguales — sin distorsión',text:'El rango de entrada y el de resultado tienen la misma amplitud. La conversión es una traslación pura sin compresión.'});
+    }
+    bodyEl.innerHTML=banners.map(b=>`<div class="sbanner ${b.cls}"><div class="si">${b.icon}</div><div><div class="st">${b.title}</div><div class="sx">${b.text}</div></div></div>`).join('');
+    return;
+  }
+
+  // Caso especial: objetivos con % y sin escala de opciones (modo pct directo)
+  if(sc==='obj' && r.isPct){
+    iconEl.innerHTML='📊'; iconEl.style.background='var(--teal-l)';
+    titleEl.textContent='Modo porcentual directo — conversión de % a escala de resultados';
+    subEl.textContent=`Objetivos: el % de cumplimiento (0–${maxR}%) se convierte directamente a la escala de resultados.`;
+    banners.push({cls:'bteal',icon:'📊',title:'Cómo funciona el modo % en Objetivos',
+      text:`En este modo NO se usa una escala de respuesta con opciones discretas. En cambio, el evaluado ingresa directamente su % de cumplimiento (entre 0% y ${maxR}%). Ese porcentaje se mapea linealmente a la escala de resultados (${minRes}–${maxRes}). Ejemplo: 100% → ${reescalar(100,minR,maxR,minRes,maxRes).toFixed(2)}, 50% → ${reescalar(50,minR,maxR,minRes,maxRes).toFixed(2)}.`});
+    banners.push({cls:'binfo',icon:'📐',title:`Fórmula de conversión porcentual`,
+      text:`resultado = ((% − ${minR}) / (${maxR} − ${minR})) × (${maxRes} − ${minRes}) + ${minRes}. El máximo permitido es ${maxR}%, que equivale al máximo de la escala de resultados (${maxRes}). Superar el ${maxR}% queda fuera del rango permitido.`});
+    // Si el máximo permitido > 100%, hay superación posible
+    if(maxR>100){
+      banners.push({cls:'bwarn',icon:'⚠️',title:`Máximo permitido > 100% (${maxR}%)`,
+        text:`Has configurado que el objetivo puede cumplirse hasta un ${maxR}%. Esto significa que el 100% de cumplimiento NO equivale al máximo de la escala de resultados, sino a ${reescalar(100,minR,maxR,minRes,maxRes).toFixed(2)}. Para obtener el máximo (${maxRes}) se requiere llegar al ${maxR}%.`});
+    }
+  } else if(esIgual){
+    iconEl.innerHTML='✅'; iconEl.style.background='var(--green-l)';
+    titleEl.textContent='Escalas idénticas — sin reescalamiento necesario';
+    subEl.textContent=`${nombre}: origen y destino son iguales.`;
+    banners.push({cls:'bok',icon:'✅',title:'Sin transformación',text:`Las escalas (${minR}–${maxR}) son idénticas. El valor se traspasa directamente.`});
+  } else if(mismaAmp){
+    iconEl.innerHTML='↔️'; iconEl.style.background='var(--amber-l)';
+    titleEl.textContent='Traslación simple (misma amplitud, distinto origen)';
+    subEl.textContent=`${nombre}: desplazamiento ${(minRes-minR>=0?'+':'')}${(minRes-minR).toFixed(2)} pts.`;
+    banners.push({cls:'bwarn',icon:'↔️',title:'Traslación',text:`Misma amplitud (${rangoR} pts), origen distinto. resultado = respuesta + ${(minRes-minR).toFixed(4)}. Sin compresión ni expansión.`});
+  } else {
+    const comprime=rangoRes<rangoR;
+    iconEl.innerHTML='🔄'; iconEl.style.background=bgL;
+    titleEl.textContent='Reescalamiento activo — regla de tres proporcional';
+    subEl.textContent=`${nombre}: factor ×${factor.toFixed(4)} · escala se ${comprime?'comprime':'expande'}.`;
+    banners.push({cls:'binfo',icon:'🔄',title:'Interpolación lineal (regla de tres)',text:`Escala origen (${minR}–${maxR}) → destino (${minRes}–${maxRes}). Factor: ×${factor.toFixed(4)}. Fórmula: ((x−${minR})/(${maxR}−${minR}))×(${maxRes}−${minRes})+${minRes}`});
+    banners.push({cls:'bpurple',icon:'📐',title:'Equivalencia regla de tres',text:`Si ${maxR}→${maxRes}, entonces x→(x×${maxRes})/${maxR} (con offset de inicio). Cada unidad de respuesta vale ${factor.toFixed(4)} unidades de resultado.`});
+    if(comprime) banners.push({cls:'bwarn',icon:'⚠️',title:'Compresión de escala',text:`Rango resultado (${rangoRes}) < rango respuesta (${rangoR}). Se pierde discriminación: ${(rangoR/rangoRes).toFixed(2)} puntos de respuesta = 1 punto de resultado.`});
+    else banners.push({cls:'bok',icon:'📈',title:'Expansión de escala',text:`Rango resultado (${rangoRes}) > rango respuesta (${rangoR}). Cada punto de respuesta aporta ${factor.toFixed(4)} pts de resultado.`});
+  }
+  bodyEl.innerHTML=banners.map(b=>`<div class="sbanner ${b.cls}"><div class="si">${b.icon}</div><div><div class="st">${b.title}</div><div class="sx">${b.text}</div></div></div>`).join('');
+}
+
+function renderTabla(sc,containerEl){
+  const r=getRango(sc); const minR=r.min, maxR=r.max;
+  const color=sc==='comp'?'var(--blue)':'var(--teal)';
+  const metodoLabel=S.metodo==='regla3'?'Regla de 3 (x / máx × máx resultado)':'Interpolación lineal';
+
+  // Helper: find what position (0-based index) a respOption is in (to detect semantic mismatch)
+  function detectMismatch(opcIdx, totalOpc, nivelResultIdx, totalNiveles){
+    // Relative position in response scale vs result scale
+    const relResp = opcIdx/(totalOpc-1||1);
+    const relRes  = nivelResultIdx/(totalNiveles-1||1);
+    return Math.abs(relResp-relRes)>0.4; // >40% positional difference = mismatch
+  }
+
+  // ── MODO RANGO LIBRE ──
+  if(sc==='obj'&&r.isRango){
+    const tr=S.resMax-S.resMin;
+    const fronteras=S.niveles.flatMap(n=>[n.min,n.max])
+      .map(resV=>{
+        if(S.metodo==='regla3') return (resV/S.resMax)*maxR;
+        return ((resV-S.resMin)/tr)*(maxR-minR)+minR;
+      }).filter(v=>v>=minR&&v<=maxR);
+    const pasos=[0,25,50,75,100].map(p=>minR+(maxR-minR)*(p/100));
+    const todosLos=[...new Set([minR,...pasos,...fronteras,maxR].map(v=>Math.round(v*100)/100))].sort((a,b)=>a-b);
+    let threshRows=''; S.niveles.forEach(n=>{
+      const xMin=S.metodo==='regla3'?(n.min/S.resMax)*maxR:((n.min-S.resMin)/tr)*(maxR-minR)+minR;
+      const xMax=S.metodo==='regla3'?(n.max/S.resMax)*maxR:((n.max-S.resMin)/tr)*(maxR-minR)+minR;
+      threshRows+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span class="cat-pill" style="background:${n.color}22;color:${n.color};border:1px solid ${n.color}44;min-width:80px;text-align:center">${n.nombre}</span><span style="font-size:12.5px;color:var(--text2)">desde <strong>${xMin.toFixed(2)}</strong> hasta <strong>${xMax.toFixed(2)}</strong></span></div>`;
+    });
+    let rows=todosLos.map(x=>{
+      const res=reescalar(x,minR,maxR,S.resMin,S.resMax);
+      const nivel=S.niveles.find(n=>res>=n.min&&res<=n.max)||S.niveles[0];
+      const pctR=Math.round(((x-minR)/(maxR-minR))*100);
+      const pctRes=Math.round(((res-S.resMin)/(S.resMax-S.resMin))*100);
+      const isFrontera=fronteras.some(f=>Math.abs(f-x)<0.05);
+      return `<tr ${isFrontera?`style="background:${nivel.color}0d"`:''}>
+        <td style="font-weight:${isFrontera?700:400}">${x}</td><td>${pctR}%</td>
+        <td class="${isFrontera?'hl':''}">${res.toFixed(2)}</td><td>${pctRes}%</td>
+        <td><span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44">${nivel.nombre}</span></td>
+      </tr>`;
+    }).join('');
+    containerEl.innerHTML=`
+      <div style="margin-bottom:12px;padding:10px 13px;background:var(--teal-l);border-left:3px solid var(--teal);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2)">
+        <strong style="color:var(--teal)">Umbrales por categoría — Rango libre ${minR}–${maxR}</strong> &nbsp;·&nbsp; <em>${metodoLabel}</em><br>
+        <div style="margin-top:8px">${threshRows}</div>
+      </div>
+      <table class="map-table"><thead><tr><th>Valor</th><th>% del rango</th><th>→ Resultado</th><th>% Logro</th><th>Categoría</th></tr></thead><tbody>${rows}</tbody></table>`;
+    return;
+  }
+
+  // ── MODO % MÁXIMO ──
+  if(sc==='obj'&&r.isPct){
+    const tr=S.resMax-S.resMin;
+    let infoRows=''; S.niveles.forEach(n=>{
+      const pctMin=S.metodo==='regla3'?(n.min/S.resMax)*maxR:((n.min-S.resMin)/tr)*(maxR-minR)+minR;
+      const pctMax=S.metodo==='regla3'?(n.max/S.resMax)*maxR:((n.max-S.resMin)/tr)*(maxR-minR)+minR;
+      infoRows+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span class="cat-pill" style="background:${n.color}22;color:${n.color};border:1px solid ${n.color}44;min-width:80px;text-align:center">${n.nombre}</span><span style="font-size:12.5px;color:var(--text2)">desde <strong>${pctMin.toFixed(1)}%</strong> hasta <strong>${pctMax.toFixed(1)}%</strong></span></div>`;
+    });
+    const puntosPct=[0,25,50,75,100].map(p=>minR+(maxR-minR)*(p/100));
+    let rows=puntosPct.map(x=>{
+      const res=reescalar(x,minR,maxR,S.resMin,S.resMax);
+      const nivel=S.niveles.find(n=>res>=n.min&&res<=n.max)||S.niveles[0];
+      return `<tr><td>${x}%</td><td>${Math.round(((x-minR)/(maxR-minR))*100)}%</td><td class="hl">${res.toFixed(2)}</td><td>${Math.round(((res-S.resMin)/(S.resMax-S.resMin))*100)}%</td><td><span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44">${nivel.nombre}</span></td></tr>`;
+    }).join('');
+    containerEl.innerHTML=`
+      <div style="margin-bottom:12px;padding:10px 13px;background:var(--teal-l);border-left:3px solid var(--teal);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2)">
+        <strong style="color:var(--teal)">Conversión % → Escala de Resultados</strong> &nbsp;·&nbsp; Máx: ${maxR}% &nbsp;·&nbsp; <em>${metodoLabel}</em>
+        <div style="margin-top:8px">${infoRows}</div>
+      </div>
+      <table class="map-table"><thead><tr><th>% Cumplimiento</th><th>Pos. relativa</th><th>→ Resultado</th><th>% Logro</th><th>Categoría</th></tr></thead><tbody>${rows}</tbody></table>`;
+    return;
+  }
+
+  // ── MODO ESCALA CON OPCIONES CONFIGURADAS ──
+  // Tabla principal con detección de inconsistencias posicionales
+  const opciones=S[sc].nivelesResp
+    .filter(n=>!isNaN(parseFloat(n.valor)))
+    .map((n,i,arr)=>({nombre:n.nombre, valor:parseFloat(n.valor), idx:i, total:arr.length}))
+    .sort((a,b)=>a.valor-b.valor);
+
+  // Re-index after sort
+  opciones.forEach((o,i)=>{ o.idx=i; o.total=opciones.length; });
+
+  // ── HEADER INFO BAR ──
+  const factor = S.metodo==='regla3'
+    ? (S.resMax/maxR)
+    : (maxR===minR ? 1 : (S.resMax-S.resMin)/(maxR-minR));
+
+  const infoBar=`<div style="margin-bottom:10px;padding:9px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text3);display:flex;flex-wrap:wrap;gap:12px;">
+    <span><strong style="color:var(--text2)">Método:</strong> ${metodoLabel}</span>
+    <span><strong style="color:var(--text2)">Escala respuesta:</strong> ${minR}–${maxR}</span>
+    <span><strong style="color:var(--text2)">Escala resultado:</strong> ${S.resMin}–${S.resMax}</span>
+    <span><strong style="color:var(--text2)">Factor:</strong> ×${factor.toFixed(4)}</span>
+    ${S.metodo==='regla3'?`<span style="color:var(--teal-d)">✕ x × ${factor.toFixed(4)} = resultado</span>`:''}
+  </div>`;
+
+  // ── TABLA PRINCIPAL (solo opciones configuradas, como en el ejemplo del usuario) ──
+  const mismatchesFull=[];
+  let mainRows=opciones.map((opc,idx)=>{
+    const res=reescalar(opc.valor,minR,maxR,S.resMin,S.resMax);
+    const nivelIdx=S.niveles.findIndex(n=>res>=n.min&&res<=n.max);
+    const nivel=nivelIdx>=0?S.niveles[nivelIdx]:S.niveles[0];
+    const nivelIdxSafe=nivelIdx>=0?nivelIdx:0;
+    const expectedIdx=Math.min(Math.round((idx/(opciones.length-1||1))*(S.niveles.length-1)),S.niveles.length-1);
+    const isMismatch=Math.abs(nivelIdxSafe-expectedIdx)>0;
+    const pctResp=maxR===minR?100:Math.round(((opc.valor-minR)/(maxR-minR))*100);
+    const pctRes=Math.round(((res-S.resMin)/(S.resMax-S.resMin))*100);
+
+    if(isMismatch) mismatchesFull.push({
+      posicion: idx+1, total: opciones.length,
+      nombre: opc.nombre, valor: opc.valor,
+      resConvertido: res.toFixed(2),
+      nivelObtenido: nivel.nombre, colorObtenido: nivel.color,
+      nivelEsperado: S.niveles[expectedIdx].nombre, colorEsperado: S.niveles[expectedIdx].color,
+      posRes: nivelIdxSafe+1, posEsp: expectedIdx+1
+    });
+
+    return `<tr style="background:${isMismatch?'#fffbeb':''}">
+      <td style="font-weight:600">${idx+1}</td>
+      <td style="font-weight:600;text-align:left">${opc.nombre}</td>
+      <td style="font-family:monospace;font-weight:700">${opc.valor}</td>
+      <td style="font-size:10px;color:var(--text4)">${pctResp}%</td>
+      <td style="font-family:monospace;font-weight:700;color:${nivel.color}" class="hl">${res.toFixed(2)}</td>
+      <td><span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44;font-size:11px">${nivel.nombre}</span>
+        ${isMismatch?`<span title="Posición ${idx+1}/${opciones.length} en respuesta → nivel ${nivelIdxSafe+1}/${S.niveles.length} en resultado (esperado nivel ${expectedIdx+1})" style="color:var(--amber);margin-left:3px;cursor:help">⚠️</span>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+
+  // ── TABLA COMPARATIVA COMPACTA (todos los valores incluyendo extremos) ──
+  const todosVal=[...new Set([minR,...opciones.map(o=>o.valor),maxR])].sort((a,b)=>a-b);
+  let allRows=todosVal.map(x=>{
+    const res=reescalar(x,minR,maxR,S.resMin,S.resMax);
+    const nivel=S.niveles.find(n=>res>=n.min&&res<=n.max)||S.niveles[0];
+    const opc=opciones.find(o=>o.valor===x);
+    const isOpc=!!opc;
+    return `<tr style="${isOpc?'font-weight:500':'color:var(--text4)'}">
+      <td>${x}</td>
+      <td style="text-align:left">${opc?opc.nombre:'—'}</td>
+      <td style="font-family:monospace" class="${isOpc?'hl':''}">${res.toFixed(2)}</td>
+      <td><span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44;font-size:10px">${nivel.nombre}</span></td>
+    </tr>`;
+  }).join('');
+
+  // ── BLOQUE DE INCONSISTENCIAS ──
+  let mismatchBlock='';
+  if(mismatchesFull.length>0){
+    const rows=mismatchesFull.map(m=>`
+      <tr style="background:var(--amber-l)">
+        <td style="font-weight:600;text-align:left">${m.nombre}</td>
+        <td>${m.valor}</td>
+        <td style="font-family:monospace;font-weight:700">${m.resConvertido}</td>
+        <td><span class="cat-pill" style="background:${m.colorObtenido}22;color:${m.colorObtenido};border:1px solid ${m.colorObtenido}44">${m.nivelObtenido}</span></td>
+        <td><span class="cat-pill" style="background:${m.colorEsperado}22;color:${m.colorEsperado};border:1px solid ${m.colorEsperado}44">${m.nivelEsperado}</span></td>
+        <td style="font-size:11px;color:var(--text3)">Pos. ${m.posicion}/${m.total} en resp. → nivel ${m.posRes}/${S.niveles.length} en result. (esperado nivel ${m.posEsp})</td>
+      </tr>`).join('');
+    mismatchBlock=`
+      <div style="margin-top:14px">
+        <div style="padding:10px 13px 6px;background:var(--amber-l);border:1px solid #fcd34d;border-radius:8px 8px 0 0;font-size:12.5px;">
+          <strong style="color:var(--amber)">⚠️ Inconsistencias posicionales detectadas (${mismatchesFull.length})</strong>
+          <span style="color:var(--text3);font-size:12px;margin-left:8px">Opciones que convierten a un nivel desproporcionado a su posición en la escala de respuesta</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="map-table" style="border-radius:0 0 8px 8px;overflow:hidden">
+            <thead><tr><th style="text-align:left">Opción</th><th>Valor resp.</th><th>→ Resultado</th><th>Nivel obtenido</th><th>Nivel esperado</th><th>Detalle</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  } else {
+    mismatchBlock=`<div style="margin-top:12px;padding:10px 13px;background:var(--green-l);border-left:3px solid var(--green);border-radius:0 6px 6px 0;font-size:12.5px;color:var(--text2)">
+      ✅ <strong style="color:var(--green)">Sin inconsistencias.</strong> Todas las opciones convierten proporcionalmente al nivel de resultado correcto.
+    </div>`;
+  }
+
+  containerEl.innerHTML=`
+    ${infoBar}
+    <div style="overflow-x:auto;margin-bottom:14px">
+      <table class="map-table">
+        <thead><tr>
+          <th style="width:36px">#</th>
+          <th style="text-align:left">Opción de respuesta</th>
+          <th>Valor <small style="font-weight:400">(escala resp.)</small></th>
+          <th>% Resp.</th>
+          <th>→ Resultado <small style="font-weight:400">(${S.resMin}–${S.resMax})</small></th>
+          <th>Nivel según escala final</th>
+        </tr></thead>
+        <tbody>${mainRows}</tbody>
+      </table>
+    </div>
+    ${mismatchBlock}
+    <details style="margin-top:10px">
+      <summary style="cursor:pointer;font-size:12px;color:var(--text3);padding:6px 0">Ver tabla completa incluyendo extremos del rango</summary>
+      <div style="overflow-x:auto;margin-top:8px">
+        <table class="map-table">
+          <thead><tr><th>Valor</th><th style="text-align:left">Etiqueta</th><th>→ Resultado</th><th>Categoría</th></tr></thead>
+          <tbody>${allRows}</tbody>
+        </table>
+      </div>
+    </details>`;
+}
+
+function renderTablaCombinadaSimple(el){
+  const rC=getRango('comp'); const rO=getRango('obj');
+  const ptsC=[...new Set(S.comp.nivelesResp.map(n=>parseFloat(n.valor)).filter(v=>!isNaN(v)))].sort((a,b)=>a-b);
+  // For obj rango/pct mode, sample representative points instead of discrete options
+  let ptsO;
+  if(rO.isRango||rO.isPct){
+    ptsO=[0,25,50,75,100].map(p=>rO.min+(rO.max-rO.min)*(p/100)).map(v=>Math.round(v*10)/10);
+    ptsO=[...new Set(ptsO)];
+  } else {
+    ptsO=[...new Set(S.obj.nivelesResp.map(n=>parseFloat(n.valor)).filter(v=>!isNaN(v)))].sort((a,b)=>a-b);
+  }
+  const wC=S.pesoComp/100; const wO=1-wC;
+  let rows='';
+  ptsC.forEach(vc=>{ ptsO.forEach(vo=>{
+    const resC=reescalar(vc,rC.min,rC.max,S.resMin,S.resMax);
+    const resO=reescalar(vo,rO.min,rO.max,S.resMin,S.resMax);
+    const final=resC*wC+resO*wO;
+    const nivel=S.niveles.find(n=>final>=n.min&&final<=n.max)||S.niveles[0];
+    const nmC=S.comp.nivelesResp.find(n=>parseFloat(n.valor)===vc);
+    const nmO=rO.isRango||rO.isPct?null:S.obj.nivelesResp.find(n=>parseFloat(n.valor)===vo);
+    const voLabel=rO.isRango?`${vo} (libre)`:rO.isPct?`${vo}%`:vo;
+    const pctF=Math.round(((final-S.resMin)/(S.resMax-S.resMin))*100);
+    rows+=`<tr><td>${vc}${nmC?` <small style="color:var(--text3)">(${nmC.nombre})</small>`:''}</td><td>${resC.toFixed(2)}</td><td>${voLabel}${nmO?` <small style="color:var(--text3)">(${nmO.nombre})</small>`:''}</td><td>${resO.toFixed(2)}</td><td class="hl">${final.toFixed(2)}</td><td>${pctF}%</td><td><span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44">${nivel.nombre}</span></td></tr>`;
+  }); });
+  el.innerHTML=`<p style="font-size:12px;color:var(--text3);margin-bottom:8px">Ponderación: Competencias ${S.pesoComp}% + Objetivos ${100-S.pesoComp}%</p>
+  <table class="map-table"><thead><tr><th>Comp. (val)</th><th>→ Res.C</th><th>Obj. (val)</th><th>→ Res.O</th><th>Final</th><th>% Final</th><th>Categoría</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ════════════════════════════════════════════
+// ANÁLISIS DE COHERENCIA — 7 PASOS
+// ════════════════════════════════════════════
+function coherenciaEscala(sc, containerEl){
+  const r = getRango(sc);
+  const minR = r.min, maxR = r.max;
+  const minRes = S.resMin, maxRes = S.resMax;
+  const rangoR = maxR - minR;
+  const rangoRes = maxRes - minRes;
+  const isComp = sc === 'comp';
+  const color = isComp ? 'var(--blue)' : 'var(--teal)';
+  const colorL = isComp ? 'var(--blue-l)' : 'var(--teal-l)';
+  const nombre = isComp ? 'Competencias' : 'Objetivos';
+  const opciones = S[sc].nivelesResp
+    .filter(n => !isNaN(parseFloat(n.valor)))
+    .map(n => ({nombre: n.nombre, valor: parseFloat(n.valor)}))
+    .sort((a,b) => a.valor - b.valor);
+
+  // ── PASO 1: Identificar escalas ──
+  const paso1 = `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px">Paso 1 · Identificación de escalas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="padding:10px 14px;background:${colorL};border-radius:6px;border:1px solid ${color}44">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${color};margin-bottom:4px">Escala de Respuesta (${nombre})</div>
+          <div style="font-size:18px;font-weight:700;color:${color}">${minR} → ${maxR}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Amplitud: ${rangoR} puntos · ${opciones.length} opciones configuradas</div>
+          ${opciones.map(o=>`<div style="font-size:11px;margin-top:3px;color:var(--text2)">• ${o.nombre} = <strong>${o.valor}</strong></div>`).join('')}
+        </div>
+        <div style="padding:10px 14px;background:var(--green-l);border-radius:6px;border:1px solid var(--green)44">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:4px">Escala de Resultados (destino)</div>
+          <div style="font-size:18px;font-weight:700;color:var(--green)">${minRes} → ${maxRes}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Amplitud: ${rangoRes} puntos · ${S.niveles.length} niveles</div>
+          ${S.niveles.map(n=>`<div style="font-size:11px;margin-top:3px;color:var(--text2)">• ${n.nombre}: <strong>${n.min}–${n.max}</strong></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+
+  // ── PASO 2: ¿Misma base numérica? ──
+  const mismaBase = (minR === minRes && maxR === maxRes);
+  const mismoRango = Math.abs(rangoR - rangoRes) < 0.001;
+  const factor = rangoR !== 0 ? rangoRes / rangoR : 1;
+
+  let paso2status, paso2msg;
+  if(mismaBase){
+    paso2status = 'ok';
+    paso2msg = `Ambas escalas comparten exactamente la misma base numérica (${minR}–${maxR}). <strong>No se requiere transformación matemática</strong>.`;
+  } else if(mismoRango){
+    paso2status = 'warn';
+    paso2msg = `Las escalas tienen la misma amplitud (${rangoR} puntos) pero distinto punto de inicio (respuesta: ${minR}, resultado: ${minRes}). Se aplica solo una traslación de +${(minRes-minR).toFixed(2)} puntos.`;
+  } else {
+    paso2status = 'info';
+    paso2msg = `Las escalas <strong>no están en la misma base numérica</strong>: respuesta ${minR}–${maxR} vs resultado ${minRes}–${maxRes}. Se requerirá una transformación matemática proporcional (factor ×${factor.toFixed(4)}).`;
+  }
+
+  const paso2 = `
+    <div style="background:${paso2status==='ok'?'var(--green-l)':paso2status==='warn'?'var(--amber-l)':'var(--blue-l)'};border:1px solid ${paso2status==='ok'?'#6ee7b7':paso2status==='warn'?'#fcd34d':'var(--blue-m)'};border-radius:8px;padding:12px 16px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px">Paso 2 · Verificación de base numérica</div>
+      <div style="font-size:13px;color:var(--text2)">${paso2status==='ok'?'✅':'⚠️'} ${paso2msg}</div>
+    </div>`;
+
+  // ── PASO 3: Equivalencia de puntos de corte ──
+  const cortesRes = S.niveles.map(n => n.min);
+  cortesRes.push(S.niveles[S.niveles.length-1].max);
+  const cortesRows = opciones.map(o => {
+    const resConv = reescalar(o.valor, minR, maxR, minRes, maxRes);
+    const nivel = S.niveles.find(n => resConv >= n.min && resConv <= n.max) || S.niveles[0];
+    const pct = Math.round(((o.valor - minR)/(maxR - minR))*100);
+    // ¿Cae exactamente en un umbral de corte?
+    const enCorte = cortesRes.some(c => Math.abs(resConv - c) < 0.05);
+    return `<tr>
+      <td style="font-weight:600">${o.nombre}</td>
+      <td style="font-family:monospace">${o.valor}</td>
+      <td>${pct}%</td>
+      <td style="font-family:monospace;font-weight:700;color:${nivel.color}">${resConv.toFixed(2)}</td>
+      <td><span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44">${nivel.nombre}</span></td>
+      <td style="color:${enCorte?'var(--green)':'var(--text4)'};">${enCorte?'✅ Exacto':'Dentro del rango'}</td>
+    </tr>`;
+  }).join('');
+
+  const paso3 = `
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;padding:10px 16px;background:var(--surface2);border-radius:8px 8px 0 0;border:1px solid var(--border)">Paso 3 · Equivalencia de puntos de corte</div>
+      <div style="overflow-x:auto;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">
+        <table class="map-table">
+          <thead><tr><th style="text-align:left">Opción</th><th>Valor resp.</th><th>% del rango</th><th>→ Resultado</th><th>Nivel asignado</th><th>Alineación</th></tr></thead>
+          <tbody>${cortesRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // ── PASO 4: ¿Congruencia? ──
+  // Check if each option's position rank matches expected result level rank
+  const incongruentes = opciones.filter((o, idx) => {
+    const resConv = reescalar(o.valor, minR, maxR, minRes, maxRes);
+    const nivelIdx = S.niveles.findIndex(n => resConv >= n.min && resConv <= n.max);
+    const nivelIdxSafe = nivelIdx >= 0 ? nivelIdx : 0;
+    const expectedIdx = Math.min(Math.round((idx/(opciones.length-1||1))*(S.niveles.length-1)), S.niveles.length-1);
+    return Math.abs(nivelIdxSafe - expectedIdx) > 0;
+  });
+
+  const esCongruente = incongruentes.length === 0;
+  let paso4;
+  if(esCongruente){
+    paso4 = `<div style="background:var(--green-l);border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px">Paso 4 · Determinación de congruencia</div>
+      <div style="font-size:13px;color:var(--text2)">✅ <strong>Escalas congruentes.</strong> Cada opción de respuesta cae proporcionalmente en el nivel de resultado que le corresponde según su posición en la escala.</div>
+    </div>`;
+  } else {
+    const listInc = incongruentes.map(o => {
+      const resConv = reescalar(o.valor, minR, maxR, minRes, maxRes);
+      const nivel = S.niveles.find(n=>resConv>=n.min&&resConv<=n.max)||S.niveles[0];
+      const idx = opciones.indexOf(o);
+      const expectedIdx = Math.min(Math.round((idx/(opciones.length-1||1))*(S.niveles.length-1)),S.niveles.length-1);
+      return `<li><strong>"${o.nombre}"</strong> (valor ${o.valor} → ${resConv.toFixed(2)}) clasifica como <span style="color:${nivel.color};font-weight:600">${nivel.nombre}</span>, pero posicionalmente se esperaría <strong>${S.niveles[expectedIdx].nombre}</strong>.</li>`;
+    }).join('');
+    paso4 = `<div style="background:var(--amber-l);border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px">Paso 4 · Determinación de congruencia</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px">⚠️ <strong>Incongruencia detectada.</strong> ${incongruentes.length} opción(es) no caen en el nivel de resultado esperado según su posición:</div>
+      <ul style="font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.8">${listInc}</ul>
+    </div>`;
+  }
+
+  // ── PASO 5: Impacto ──
+  let paso5;
+  const factorStr = factor.toFixed(4);
+  const comprime = rangoRes < rangoR;
+  const expande = rangoRes > rangoR;
+
+  if(mismaBase){
+    paso5 = `<div style="background:var(--green-l);border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px">Paso 5 · Impacto de la conversión</div>
+      <div style="font-size:13px;color:var(--text2)">✅ <strong>Sin impacto.</strong> Las escalas son idénticas — los valores se trasladan directamente sin ninguna distorsión. No hay inflación, compresión ni castigo.</div>
+    </div>`;
+  } else {
+    // Detect inflation/deflation
+    const maxRespConv = reescalar(maxR, minR, maxR, minRes, maxRes);
+    const midR = (minR + maxR)/2;
+    const midConv = reescalar(midR, minR, maxR, minRes, maxRes);
+    const midEsperado = (minRes + maxRes)/2;
+    const infla = midConv > midEsperado + 0.1;
+    const deflacta = midConv < midEsperado - 0.1;
+
+    let impacts = [];
+    if(comprime) impacts.push(`<li><strong>Compresión de categorías:</strong> El rango de respuesta (${rangoR} pts) es mayor que el de resultado (${rangoRes} pts). Diferencias de ${(rangoR/rangoRes).toFixed(2)} puntos en respuesta equivalen a solo 1 punto en resultado. Esto reduce la discriminación entre niveles.</li>`);
+    if(expande) impacts.push(`<li><strong>Expansión de discriminación:</strong> El rango de resultado (${rangoRes} pts) es mayor que el de respuesta (${rangoR} pts). Cada punto de respuesta genera ${factorStr} puntos de resultado — mayor sensibilidad en la clasificación.</li>`);
+    if(!mismaBase && minR !== minRes) impacts.push(`<li><strong>Desplazamiento de base:</strong> La escala de respuesta empieza en ${minR} y la de resultado en ${minRes}. El punto de inicio se ajusta automáticamente en la conversión.</li>`);
+    if(infla && !incongruentes.length) impacts.push(`<li><strong>Ligera inflación:</strong> Los valores medios de respuesta convierten ligeramente por encima del centro de la escala de resultado (${midConv.toFixed(2)} vs ${midEsperado.toFixed(2)} esperado).</li>`);
+    if(deflacta && !incongruentes.length) impacts.push(`<li><strong>Ligera deflación:</strong> Los valores medios de respuesta convierten ligeramente por debajo del centro de la escala de resultado (${midConv.toFixed(2)} vs ${midEsperado.toFixed(2)} esperado).</li>`);
+    if(!impacts.length) impacts.push(`<li>La conversión es proporcional. El factor ×${factorStr} se aplica uniformemente sin distorsión significativa.</li>`);
+
+    paso5 = `<div style="background:var(--blue-l);border:1px solid var(--blue-m);border-radius:8px;padding:12px 16px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px">Paso 5 · Impacto de la conversión</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:6px">Factor de conversión: <strong style="color:var(--blue)">×${factorStr}</strong> · Cada punto en la escala de respuesta vale ${factorStr} puntos en resultado.</div>
+      <ul style="font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.8">${impacts.join('')}</ul>
+    </div>`;
+  }
+
+  // ── PASO 6: Conclusión ──
+  const necesitaReescalamiento = !mismaBase;
+  const hayDistorsion = !esCongruente;
+  let concluTitulo, concluColor, concluBg, concluBorde, concluTexto;
+
+  if(!necesitaReescalamiento){
+    concluTitulo = '✅ ESCALAS ALINEADAS: no requiere reescalamiento';
+    concluColor = 'var(--green)'; concluBg = 'var(--green-l)'; concluBorde = '#6ee7b7';
+    concluTexto = `Las escalas de respuesta y de resultado de ${nombre} son idénticas. Los valores se trasladan directamente. No hay transformación matemática involucrada.`;
+  } else if(hayDistorsion){
+    concluTitulo = '⚠️ ESCALAS NO ALINEADAS: requiere reescalamiento y genera distorsión';
+    concluColor = 'var(--red)'; concluBg = 'var(--red-l)'; concluBorde = '#fca5a5';
+    concluTexto = `Las escalas de ${nombre} no están alineadas y al convertir entre ellas algunas opciones de respuesta caen en niveles de resultado diferentes a los esperados proporcionalmente. Esto puede generar clasificaciones sorpresivas para el equipo de RRHH.`;
+  } else {
+    concluTitulo = '🔄 ESCALAS NO ALINEADAS: requiere reescalamiento (sin distorsión significativa)';
+    concluColor = 'var(--blue)'; concluBg = 'var(--blue-l)'; concluBorde = 'var(--blue-m)';
+    concluTexto = `Las escalas de ${nombre} tienen bases distintas pero la conversión es proporcional. Todas las opciones configuradas caen en el nivel de resultado correcto según su posición. El reescalamiento es transparente y consistente.`;
+  }
+
+  const paso6 = `<div style="background:${concluBg};border:2px solid ${concluBorde};border-radius:8px;padding:14px 18px;margin-bottom:10px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px">Paso 6 · Conclusión</div>
+    <div style="font-size:14px;font-weight:700;color:${concluColor};margin-bottom:6px">${concluTitulo}</div>
+    <div style="font-size:13px;color:var(--text2)">${concluTexto}</div>
+  </div>`;
+
+  // ── PASO 7: Corrección propuesta ──
+  let paso7 = '';
+  if(necesitaReescalamiento || hayDistorsion){
+    // Proponer escala de respuesta que mapee exactamente a los cortes de resultado
+    const opcNombresSorted = opciones.map(o=>o.nombre);
+    const nLevels = opciones.length;
+    const cortesProporcionalesResp = opciones.map((_,i) => {
+      const t = i/(nLevels-1||1);
+      return Math.round((minR + t*(maxR-minR))*100)/100;
+    });
+    const cortesConvertidos = cortesProporcionalesResp.map(v =>
+      Math.round(reescalar(v, minR, maxR, minRes, maxRes)*100)/100
+    );
+
+    // Check if there's a simpler adjustment
+    const propMinR = minRes;
+    const propMaxR = maxRes;
+    const propFactor = 1; // direct mapping
+
+    const corrRows = opciones.map((o,i) => {
+      const valPropuesto = Math.round((minRes + (i/(nLevels-1||1))*(maxRes-minRes))*100)/100;
+      const nivelConv = reescalar(valPropuesto, minRes, maxRes, minRes, maxRes);
+      const nivel = S.niveles.find(n=>nivelConv>=n.min&&nivelConv<=n.max)||S.niveles[0];
+      return `<tr>
+        <td style="font-weight:600">${o.nombre}</td>
+        <td style="color:var(--text3);text-decoration:line-through">${o.valor}</td>
+        <td style="font-weight:700;color:var(--green)">${valPropuesto}</td>
+        <td class="hl">${nivelConv.toFixed(2)}</td>
+        <td><span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44">${nivel.nombre}</span></td>
+      </tr>`;
+    }).join('');
+
+    paso7 = `<div style="background:var(--purple-l);border:1px solid #c4b5fd;border-radius:8px;padding:12px 16px;margin-bottom:0">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px">Paso 7 · Corrección propuesta (opcional)</div>
+      <div style="font-size:12.5px;color:var(--text2);margin-bottom:10px">
+        Para eliminar el reescalamiento y que cada opción caiga exactamente en su nivel de resultado, se puede ajustar la escala de respuesta para que sus valores coincidan directamente con los rangos de resultado. A continuación se muestra cómo quedarían los valores:
+      </div>
+      <div style="overflow-x:auto">
+        <table class="map-table">
+          <thead><tr><th style="text-align:left">Opción</th><th>Valor actual</th><th>Valor propuesto</th><th>→ Resultado</th><th>Nivel</th></tr></thead>
+          <tbody>${corrRows}</tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text3)">
+        💡 Con esta corrección, la escala de respuesta de ${nombre} iría de <strong>${minRes}</strong> a <strong>${maxRes}</strong>, usando exactamente la misma base que la escala de resultado. No se requeriría ningún reescalamiento.
+      </div>
+    </div>`;
+  } else {
+    paso7 = `<div style="background:var(--green-l);border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:6px">Paso 7 · Corrección propuesta</div>
+      <div style="font-size:13px;color:var(--text2)">✅ <strong>No se requiere corrección.</strong> La configuración actual es óptima — las escalas están alineadas y no generan distorsión.</div>
+    </div>`;
+  }
+
+  containerEl.innerHTML = `
+    <div class="card" style="border-top:3px solid ${color}">
+      ${paso1}${paso2}${paso3}${paso4}${paso5}${paso6}${paso7}
+    </div>`;
+}
+
+function generarAnalisis(){
+  document.getElementById('analisis-output').style.display='block';
+  coherenciaEscala('comp', document.getElementById('coherencia-comp'));
+  coherenciaEscala('obj',  document.getElementById('coherencia-obj'));
+  renderTabla('comp', document.getElementById('an-c-table'));
+  renderTabla('obj',  document.getElementById('an-o-table'));
+  renderTablaCombinadaSimple(document.getElementById('an-combined-table'));
+  document.getElementById('analisis-output').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ════════════════════════════════════════════
+// ÍTEMS DEL FORMULARIO
+// ════════════════════════════════════════════
+function renderItemsConfig(sc){
+  const container=document.getElementById(`items-${sc}-container`);
+  const data=S[sc].items; container.innerHTML='';
+  if(data.length===0){
+    container.innerHTML=`<p style="font-size:12px;color:var(--text4);text-align:center;padding:12px">Sin ítems. Haz clic en "Agregar" para comenzar.</p>`;
+    return;
+  }
+  data.forEach((item,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:1fr auto;gap:0;border-bottom:1px solid var(--border);padding:10px 0;align-items:start';
+    row.innerHTML=`<div>
+      <div class="field-row2" style="gap:8px;margin-bottom:6px">
+        <div><label>Nombre</label><input type="text" value="${item.nombre}" oninput="S['${sc}'].items[${i}].nombre=this.value" placeholder="Ej: Liderazgo"></div>
+        <div><label>Peso en sección (%)</label><input type="number" value="${item.peso}" min="0" max="100" oninput="S['${sc}'].items[${i}].peso=parseFloat(this.value)"></div>
+      </div>
+      <div><label>Descripción (opcional)</label><input type="text" value="${item.desc||''}" oninput="S['${sc}'].items[${i}].desc=this.value" placeholder="Breve descripción del criterio"></div>
+    </div>
+    <div style="padding-left:10px"><button class="rm-btn" onclick="quitarItem('${sc}',${i})">×</button></div>`;
+    container.appendChild(row);
+  });
+}
+
+function agregarItem(sc){
+  const n=S[sc].items.length;
+  S[sc].items.push({nombre:`Ítem ${n+1}`,peso:Math.round(100/(n+1)),desc:''});
+  // Redistribuir pesos equitativamente
+  const eq=Math.round(100/S[sc].items.length);
+  S[sc].items.forEach(it=>it.peso=eq);
+  renderItemsConfig(sc);
+}
+
+function quitarItem(sc,i){
+  S[sc].items.splice(i,1); renderItemsConfig(sc);
+}
+
+// ════════════════════════════════════════════
+// SIMULADOR DE FORMULARIO
+// ════════════════════════════════════════════
+function renderSimForm(){
+  const container=document.getElementById('sim-form-container');
+  const hasItems=S.comp.items.length>0||S.obj.items.length>0;
+  if(!hasItems){
+    container.innerHTML=`<div style="padding:32px;text-align:center;color:var(--text3)"><div style="font-size:32px;margin-bottom:10px">📋</div><p>Configura los ítems en la pestaña <strong>Configuración → Sección 4</strong> y vuelve aquí para evaluar.</p><button class="calc-btn" style="margin-top:14px" onclick="showTab('t-config')">⚙️ Ir a configuración</button></div>`;
+    document.getElementById('sim-btn-row').style.display='none';
+    return;
+  }
+  container.innerHTML='';
+  document.getElementById('sim-btn-row').style.display='block';
+
+  // SECCIÓN COMPETENCIAS
+  if(S.comp.items.length>0){
+    container.appendChild(buildSimSection('comp'));
+  }
+  // SECCIÓN OBJETIVOS
+  if(S.obj.items.length>0){
+    container.appendChild(buildSimSection('obj'));
+  }
+}
+
+function buildSimSection(sc){
+  const isComp=sc==='comp';
+  const color=isComp?'var(--blue)':'var(--teal)';
+  const peso=isComp?S.pesoComp:100-S.pesoComp;
+  const r=getRango(sc);
+
+  const wrap=document.createElement('div');
+  wrap.className='sim-section'; wrap.style.marginBottom='16px';
+
+  // Header
+  const head=document.createElement('div');
+  head.className=`sim-sec-head ${isComp?'blue-head':'teal-head'}`;
+  head.innerHTML=`
+    <div class="sim-sec-title">
+      <span class="escala-badge ${isComp?'badge-blue':'badge-teal'}">${isComp?'🎯 Competencias':'📈 Objetivos'}</span>
+      <span class="sim-sec-name">${isComp?'Evaluación de Competencias':'Evaluación de Objetivos'}</span>
+    </div>
+    <span class="sim-sec-weight">Ponderación: <strong style="color:${color}">${peso}%</strong></span>`;
+  wrap.appendChild(head);
+
+  // Items
+  const itemsWrap=document.createElement('div');
+  itemsWrap.className='sim-items';
+  S[sc].items.forEach((item,i)=>{
+    const row=document.createElement('div');
+    row.className='sim-item';
+    const leftId=`sim-${sc}-${i}`;
+
+    let inputHTML='';
+    if(sc==='obj'&&S.obj.respMode==='pct'){
+      // Input numérico %
+      const curVal=FORM[sc][i]!==undefined?FORM[sc][i]:'';
+      inputHTML=`<div class="pct-input-wrap">
+        <input type="number" id="${leftId}-pct" value="${curVal}" min="0" max="${r.max}" step="0.1"
+          placeholder="0" style="width:80px;text-align:right;font-weight:700;font-size:16px"
+          oninput="setFormVal('${sc}',${i},parseFloat(this.value));updateItemPreview('${sc}',${i})">
+        <span class="pct-suffix">%</span>
+      </div>
+      <div class="pct-badge" id="${leftId}-pctbadge">máx: ${r.max}%</div>`;
+    } else if(sc==='obj'&&S.obj.respMode==='rango'){
+      // Input libre numérico entre min y max
+      const curVal=FORM[sc][i]!==undefined?FORM[sc][i]:'';
+      inputHTML=`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;color:var(--text3)">${r.min}</span>
+          <input type="number" id="${leftId}-rng" value="${curVal}"
+            min="${r.min}" max="${r.max}" step="0.01"
+            placeholder="—"
+            style="width:88px;text-align:center;font-weight:700;font-size:18px;border-color:var(--teal);border-width:2px"
+            oninput="setFormVal('${sc}',${i},parseFloat(this.value));updateItemPreview('${sc}',${i})">
+          <span style="font-size:11px;color:var(--text3)">${r.max}</span>
+        </div>
+        <div style="font-size:10px;color:var(--teal);font-weight:600">rango libre ${r.min}–${r.max}</div>
+      </div>`;
+    } else {
+      // Botones de selección
+      const btnsSel=S[sc].nivelesResp.map((n,bi)=>{
+        const isSel=FORM[sc][i]===n.valor;
+        return `<button class="r-btn ${isSel?(isComp?'sel-blue':'sel-teal'):''}" id="${leftId}-rb${bi}"
+          onclick="selRatingBtn('${sc}',${i},${bi},${n.valor},'${isComp?'sel-blue':'sel-teal'}')"
+          title="${n.nombre}">
+          <span class="rv">${n.valor}</span><span class="rn">${n.nombre}</span>
+        </button>`;
+      }).join('');
+      inputHTML=`<div class="rating-btns">${btnsSel}</div>`;
+    }
+
+    const previewScore=FORM[sc][i]!==undefined
+      ? (()=>{ const res=reescalar(FORM[sc][i],r.min,r.max,S.resMin,S.resMax); const niv=S.niveles.find(n=>res>=n.min&&res<=n.max)||S.niveles[0]; return `→ <span style="color:${color};font-weight:700">${fmtRaw(res)}</span> <span style="color:${niv.color}">(${niv.nombre})</span>`; })()
+      : 'Sin calificación';
+
+    row.innerHTML=`
+      <div class="sim-item-left">
+        <div class="sim-item-name">${item.nombre} <small style="font-weight:400;color:var(--text4)">(${item.peso}%)</small></div>
+        ${item.desc?`<div class="sim-item-desc">${item.desc}</div>`:''}
+      </div>
+      <div class="sim-item-right">
+        ${inputHTML}
+        <div class="item-score-preview" id="${leftId}-preview">${previewScore}</div>
+      </div>`;
+    itemsWrap.appendChild(row);
+  });
+  wrap.appendChild(itemsWrap);
+
+  // Section score footer
+  const footer=document.createElement('div');
+  footer.className='sim-sec-score'; footer.id=`sim-${sc}-footer`;
+  footer.innerHTML=`
+    <div class="sec-score-val" id="sim-${sc}-score" style="color:${color}">—</div>
+    <div class="sec-score-info">
+      <div class="sec-score-lbl">Promedio ponderado de la sección</div>
+      <div class="sec-score-bar-wrap"><div class="sec-score-bar-fill" id="sim-${sc}-bar" style="background:${color};width:0%"></div></div>
+    </div>`;
+  wrap.appendChild(footer);
+  updateSectionScore(sc);
+  return wrap;
+}
+
+function selRatingBtn(sc,itemIdx,btnIdx,valor,cls){
+  FORM[sc][itemIdx]=valor;
+  // Update button states
+  const item=S[sc].items[itemIdx];
+  S[sc].nivelesResp.forEach((_,bi)=>{
+    const btn=document.getElementById(`sim-${sc}-${itemIdx}-rb${bi}`);
+    if(btn){ btn.className='r-btn '+(bi===btnIdx?cls:''); }
+  });
+  updateItemPreview(sc,itemIdx);
+  updateSectionScore(sc);
+}
+
+function setFormVal(sc,itemIdx,val){
+  FORM[sc][itemIdx]=val;
+  updateSectionScore(sc);
+}
+
+function updateItemPreview(sc,itemIdx){
+  const r=getRango(sc); const color=sc==='comp'?'var(--blue)':'var(--teal)';
+  const val=FORM[sc][itemIdx];
+  const el=document.getElementById(`sim-${sc}-${itemIdx}-preview`);
+  if(!el) return;
+  if(val!==undefined&&!isNaN(val)){
+    const res=reescalar(val,r.min,r.max,S.resMin,S.resMax);
+    const nivel=S.niveles.find(n=>res>=n.min&&res<=n.max)||S.niveles[0];
+    el.innerHTML=`→ <span style="color:${color};font-weight:700">${fmtRaw(res)}</span> <span style="color:${nivel.color}">(${nivel.nombre})</span>`;
+  } else {
+    el.textContent='Sin calificación';
+  }
+}
+
+function updateSectionScore(sc){
+  const r=getRango(sc);
+  const items=S[sc].items;
+  let totalPeso=0, sumPonderado=0, count=0;
+  items.forEach((item,i)=>{
+    const val=FORM[sc][i];
+    if(val!==undefined&&!isNaN(val)){
+      const res=reescalar(val,r.min,r.max,S.resMin,S.resMax);
+      sumPonderado+=res*(item.peso/100);
+      totalPeso+=item.peso;
+      count++;
+    }
+  });
+  const scoreEl=document.getElementById(`sim-${sc}-score`);
+  const barEl=document.getElementById(`sim-${sc}-bar`);
+  if(!scoreEl) return;
+  if(count===0){ scoreEl.textContent='—'; if(barEl) barEl.style.width='0%'; return; }
+  const score=totalPeso>0?sumPonderado*(100/totalPeso):sumPonderado;
+  const pct=Math.round(((score-S.resMin)/(S.resMax-S.resMin))*100);
+  scoreEl.textContent=fmtRaw(score);
+  if(barEl) barEl.style.width=Math.max(0,Math.min(100,pct))+'%';
+}
+
+// ════════════════════════════════════════════
+// GENERAR INFORME
+// ════════════════════════════════════════════
+function generarInforme(){
+  const nombre=document.getElementById('ev-nombre').value||'—';
+  const cargo=document.getElementById('ev-cargo').value||'—';
+  const periodo=document.getElementById('ev-periodo').value||'—';
+  const fecha=new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
+
+  // Calcular score de cada sección
+  function calcSecScore(sc){
+    const r=getRango(sc); const items=S[sc].items;
+    let totalPeso=0,sumP=0;
+    items.forEach((item,i)=>{
+      const val=FORM[sc][i];
+      if(val!==undefined&&!isNaN(val)){
+        const res=reescalar(val,r.min,r.max,S.resMin,S.resMax);
+        sumP+=res*(item.peso/100); totalPeso+=item.peso;
+      }
+    });
+    if(totalPeso===0) return null;
+    return sumP*(100/totalPeso);
+  }
+
+  const scoreComp=calcSecScore('comp');
+  const scoreObj=calcSecScore('obj');
+  const wC=S.pesoComp/100; const wO=1-wC;
+  let scoreFinal=null;
+  if(scoreComp!==null&&scoreObj!==null) scoreFinal=scoreComp*wC+scoreObj*wO;
+  else if(scoreComp!==null) scoreFinal=scoreComp;
+  else if(scoreObj!==null) scoreFinal=scoreObj;
+
+  const nivelFinal=scoreFinal!==null?(S.niveles.find(n=>scoreFinal>=n.min&&scoreFinal<=n.max)||S.niveles[0]):null;
+  const pctFinal=scoreFinal!==null?Math.round(((scoreFinal-S.resMin)/(S.resMax-S.resMin))*100):null;
+
+  // Build item rows for each section
+  function buildItemRows(sc){
+    const r=getRango(sc); const items=S[sc].items;
+    if(items.length===0) return '<tr><td colspan="5" style="color:var(--text4)">Sin ítems configurados</td></tr>';
+    return items.map((item,i)=>{
+      const val=FORM[sc][i];
+      const hasVal=val!==undefined&&!isNaN(val);
+      const res=hasVal?reescalar(val,r.min,r.max,S.resMin,S.resMax):null;
+      const nivel=res!==null?(S.niveles.find(n=>res>=n.min&&res<=n.max)||S.niveles[0]):null;
+      const etiq=sc==='obj'&&S.obj.respMode==='pct'
+        ?(hasVal?`${val}%`:'—')
+        :sc==='obj'&&S.obj.respMode==='rango'
+        ?(hasVal?`valor libre`:'—')
+        :(S[sc].nivelesResp.find(n=>parseFloat(n.valor)===val)?.nombre||'—');
+      const pct=res!==null?Math.round(((res-S.resMin)/(S.resMax-S.resMin))*100):null;
+      return `<tr>
+        <td style="text-align:left;font-weight:500">${item.nombre}</td>
+        <td>${item.peso}%</td>
+        <td>${hasVal?val:'—'} ${etiq!=='—'?`<small style="color:var(--text3)">(${etiq})</small>`:''}</td>
+        <td style="font-weight:700;color:${nivel?nivel.color:'var(--text3)'}">${res!==null?res.toFixed(2):'—'}</td>
+        <td>${nivel?`<span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44">${nivel.nombre}</span>`:'—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function buildSecBlock(sc,secScore){
+    if(S[sc].items.length===0) return '';
+    const isComp=sc==='comp';
+    const color=isComp?'#2563eb':'#0891b2';
+    const bgL=isComp?'#dbeafe':'#cffafe';
+    const label=isComp?'Competencias':'Objetivos';
+    const peso=isComp?S.pesoComp:100-S.pesoComp;
+    const nivel=secScore!==null?(S.niveles.find(n=>secScore>=n.min&&secScore<=n.max)||S.niveles[0]):null;
+    const pct=secScore!==null?Math.round(((secScore-S.resMin)/(S.resMax-S.resMin))*100):null;
+    return `
+      <div class="report-section-row">
+        <div class="rs-name">${isComp?'🎯':'📈'} ${label} <span style="font-size:11px;font-weight:400;color:var(--text3)">(${peso}% ponderación)</span></div>
+        <div class="rs-score" style="color:${color}">${secScore!==null?secScore.toFixed(2):'N/D'}</div>
+        <div class="rs-details">
+          <div class="rs-bar-row">
+            <div class="rs-bar-track"><div class="rs-bar-fill" style="width:${pct||0}%;background:${color}"></div></div>
+            <span class="rs-pct" style="color:${color}">${pct!==null?pct+'%':'—'}</span>
+            ${nivel?`<span class="cat-pill" style="background:${nivel.color}22;color:${nivel.color};border:1px solid ${nivel.color}44">${nivel.nombre}</span>`:''}
+          </div>
+          <div class="rs-items-summary">Basado en ${S[sc].items.filter((_,i)=>FORM[sc][i]!==undefined).length} de ${S[sc].items.length} ítems evaluados</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin:0 0 12px">
+        <table class="report-item-table">
+          <thead><tr><th style="text-align:left">Ítem</th><th>Peso</th><th>Valor obtenido</th><th>Resultado</th><th>Categoría</th></tr></thead>
+          <tbody>${buildItemRows(sc)}</tbody>
+        </table>
+      </div>`;
+  }
+
+  const html=`
+    <div class="report-header">
+      <h3>Informe de Evaluación de Desempeño</h3>
+      <p>Generado automáticamente por EvalCalc · ${fecha}</p>
+      <div class="report-meta">
+        <div class="report-meta-item"><div class="report-meta-val">${nombre}</div><div class="report-meta-lbl">Evaluado</div></div>
+        <div class="report-meta-item"><div class="report-meta-val">${cargo}</div><div class="report-meta-lbl">Cargo</div></div>
+        <div class="report-meta-item"><div class="report-meta-val">${periodo}</div><div class="report-meta-lbl">Período</div></div>
+        <div class="report-meta-item"><div class="report-meta-val">${S.pesoComp}% / ${100-S.pesoComp}%</div><div class="report-meta-lbl">Comp. / Obj.</div></div>
+      </div>
+    </div>
+    <div class="report-body">
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:14px">Resultados por sección</div>
+      ${buildSecBlock('comp',scoreComp)}
+      ${buildSecBlock('obj',scoreObj)}
+      <div class="report-final">
+        <div class="report-final-num" ${nivelFinal?`style="color:${nivelFinal.color}"`:''}>${scoreFinal!==null?scoreFinal.toFixed(2):'N/D'}</div>
+        <div class="report-final-cat" ${nivelFinal?`style="color:${nivelFinal.color}"`:''}>${nivelFinal?nivelFinal.nombre:'Sin datos suficientes'}</div>
+        <div class="report-final-sub">
+          Resultado final integrado · ${pctFinal!==null?`${pctFinal}% de logro`:''}
+          ${scoreFinal!==null?`<br><small>Fórmula: ${scoreComp!==null?`Comp. ${scoreComp.toFixed(2)}×${S.pesoComp}%`:''}${scoreComp!==null&&scoreObj!==null?' + ':''}${scoreObj!==null?`Obj. ${scoreObj.toFixed(2)}×${100-S.pesoComp}%`:''} = ${scoreFinal.toFixed(3)}</small>`:''}
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('report-content').innerHTML=html;
+  const rep=document.getElementById('sim-report'); rep.style.display='block';
+  rep.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+renderNivelesRes();
+renderNivelesResp('comp');
+renderNivelesResp('obj');
+// Items iniciales de ejemplo
+S.comp.items=[
+  {nombre:'Trabajo en equipo',peso:25,desc:'Colaboración y apoyo con pares y equipos transversales'},
+  {nombre:'Comunicación efectiva',peso:25,desc:'Capacidad de transmitir ideas con claridad y escuchar activamente'},
+  {nombre:'Orientación a resultados',peso:25,desc:'Enfoque en el logro de metas con calidad y eficiencia'},
+  {nombre:'Resolución de problemas',peso:25,desc:'Análisis de situaciones complejas y propuesta de soluciones'},
+];
+S.obj.items=[
+  {nombre:'Meta de ventas',peso:40,desc:'Cumplimiento del objetivo de ventas mensual / trimestral'},
+  {nombre:'Proyectos entregados',peso:35,desc:'Entrega a tiempo y con calidad de proyectos asignados'},
+  {nombre:'Indicador de satisfacción',peso:25,desc:'NPS o encuesta de satisfacción del cliente interno/externo'},
+];
+renderItemsConfig('comp');
+renderItemsConfig('obj');
+actualizarFormulas();
+updatePeso(50);
+syncCalcView();
+</script>
+</body>
+</html>
